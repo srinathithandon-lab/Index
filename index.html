@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ทะเบียนถังแก๊ส — บันทึกลง Excel</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root {
+    --steel: #2B5F75;
+    --steel-dark: #1C4353;
+    --gauge: #E8A33D;
+    --gauge-dark: #8A5A17;
+    --paper: #F7F5F0;
+    --ink: #26313A;
+    --ink-soft: #5B6B73;
+    --line: #D8D3C6;
+    --ok: #1D7A4C;
+    --ok-bg: #E3F3E9;
+    --warn-bg: #FCEFDA;
+    --blue: #3B82F6;
+    --blue-bg: #EFF6FF;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans Thai', 'Sarabun', system-ui, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 20px 16px 60px; }
+  h1 { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 600; margin: 0 0 8px; color: var(--steel-dark); }
+
+  .excel-status {
+    background: var(--ok-bg); color: var(--ok);
+    border-radius: 10px; padding: 12px 16px; margin-bottom: 16px;
+    font-size: 14px; line-height: 1.6;
+  }
+  .summary-card {
+    background: #fff; border-radius: 12px; border: 1px solid var(--line);
+    padding: 16px; margin-bottom: 16px;
+  }
+  .summary-title {
+    font-size: 15px; font-weight: 600; color: var(--steel-dark); margin-bottom: 12px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px;
+  }
+  .summary-item {
+    text-align: center; padding: 10px 8px; border-radius: 8px; background: var(--paper);
+  }
+  .summary-num {
+    font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 700; color: var(--steel-dark);
+  }
+  .summary-label {
+    font-size: 11px; color: var(--ink-soft); margin-top: 4px;
+  }
+  .serial-list-box {
+    background: var(--blue-bg); border-radius: 8px; padding: 12px; margin-top: 10px;
+    max-height: 200px; overflow-y: auto; font-size: 13px; line-height: 1.8;
+  }
+  .serial-tags {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .serial-tag {
+    display: inline-block; background: #fff; border: 1px solid var(--blue); color: var(--blue);
+    padding: 4px 10px; border-radius: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 13px;
+  }
+  .manual-row { display: flex; gap: 8px; margin: 20px 0; }
+  input[type=text], input[type=number], input[type=date], input[type=password] {
+    font-family: 'IBM Plex Mono', monospace;
+    border: 1.5px solid var(--line); border-radius: 8px;
+    padding: 10px 12px; font-size: 15px; background: #fff; color: var(--ink); width: 100%;
+  }
+  input:focus { outline: none; border-color: var(--steel); }
+  .find-btn { background: var(--steel); color: #fff; padding: 0 18px; white-space: nowrap; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; }
+  button {
+    font-family: inherit; border-radius: 8px; border: none;
+    cursor: pointer; font-size: 14px; font-weight: 500;
+  }
+  .btn-primary { background: var(--ok); color: #fff; padding: 11px 14px; flex: 1; }
+  .btn-primary:active { background: #16663E; }
+  .btn-secondary { background: var(--blue); color: #fff; padding: 10px 14px; font-size: 13px; }
+  .browse-toggle { font-size: 13px; color: var(--ink-soft); background: none; border: none; padding: 0; text-decoration: underline; cursor: pointer; }
+  .divider { border: none; border-top: 1px solid var(--line); margin: 20px 0 16px; }
+  .tank-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 12px; display: none; }
+  .tank-chip {
+    background: #fff; border: 1px solid var(--line); border-radius: 6px;
+    padding: 8px 4px; font-family: 'IBM Plex Mono', monospace; font-size: 13px;
+    text-align: center; color: var(--ink); cursor: pointer;
+  }
+  .tank-chip:active { background: var(--paper); }
+  .result-card {
+    margin-top: 22px; background: #fff; border-radius: 12px;
+    border: 1px solid var(--line); overflow: hidden;
+  }
+  .result-head {
+    background: var(--steel-dark); color: #fff; padding: 14px 16px;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+  }
+  .tag-serial { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; }
+  .tag-sub { font-size: 12px; color: #AFC6CE; margin-top: 2px; }
+  .not-found { padding: 16px; font-size: 14px; color: var(--ink-soft); }
+  .history-item {
+    padding: 12px 16px; border-top: 1px solid var(--line);
+  }
+  .history-item:first-child { border-top: none; }
+  .hist-row1 { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; flex-wrap: wrap; gap: 6px; }
+  .hist-round { font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 14px; color: var(--steel-dark); }
+  .hist-date { font-size: 12px; color: var(--ink-soft); }
+  .hist-metrics { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px 10px; font-size: 12px; margin-top: 8px; }
+  .metric-label { color: var(--ink-soft); }
+  .metric-val { font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
+  .metric-empty { color: #C6C1B4; }
+  .add-btn {
+    width: 100%; background: var(--ok-bg); color: var(--ok);
+    padding: 12px; margin-top: 12px; font-weight: 600;
+  }
+  .add-form { padding: 14px 16px; background: var(--paper); border-top: 1px solid var(--line); display: none; }
+  .add-form.open { display: block; }
+  .field { margin-bottom: 10px; }
+  .field label { display: block; font-size: 12px; color: var(--ink-soft); margin-bottom: 4px; }
+  .field-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .field-row .field { flex: 1; min-width: 130px; }
+  .save-btn { width: 100%; background: var(--steel); color: #fff; padding: 12px; margin-top: 4px; }
+  .err { color: #B33A3A; font-size: 12px; margin-top: 4px; display: none; }
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--steel-dark); color: #fff; padding: 10px 18px; border-radius: 8px;
+    font-size: 13px; opacity: 0; transition: opacity 0.25s; pointer-events: none; z-index: 100;
+  }
+  .toast.show { opacity: 1; }
+  .panel { display:none; margin-top:14px; background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px; }
+  .upload-area {
+    border: 2px dashed var(--line); border-radius: 10px; padding: 24px; text-align: center;
+    cursor: pointer; margin-bottom: 16px; transition: all 0.2s;
+  }
+  .upload-area:hover { border-color: var(--steel); background: #F0F4F6; }
+  .upload-area.dragover { border-color: var(--ok); background: var(--ok-bg); }
+  .file-info { font-size: 13px; color: var(--ink-soft); margin-top: 8px; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+  .btn-row button { flex: 1; min-width: 100px; }
+  .dv-item {
+    padding: 10px 12px; background: var(--paper); border-radius: 8px; margin-bottom: 8px;
+    font-size: 13px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;
+  }
+  .dv-serial { font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: var(--steel-dark); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>ทะเบียนถังแก๊ส</h1>
+
+  <!-- 📂 อัปโหลดไฟล์ Excel -->
+  <div class="upload-area" id="dropArea">
+    <strong>📂 คลิกหรือลากไฟล์ Excel มาวางที่นี่</strong><br>
+    <span style="font-size:13px; color:var(--ink-soft)">โหลดข้อมูลเดิม → แก้ไข → บันทึกใหม่ → แทนที่ไฟล์เดิมใน OneDrive</span>
+    <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none">
+    <div class="file-info" id="fileInfo"></div>
+  </div>
+
+  <!-- ✅ สถานะข้อมูล -->
+  <div class="excel-status" id="statusBox">
+    ✅ พร้อมทำงาน — กด "บันทึกลง Excel" เพื่อสร้างไฟล์ใหม่เมื่อแก้ไขเสร็จ
+  </div>
+
+  <!-- 📋 สรุปรายงานจำนวนถังแก๊ส -->
+  <div class="summary-card">
+    <div class="summary-title">
+      📊 สรุปจำนวนถังแก๊ส (Serial ไม่ซ้ำ)
+      <button class="btn-secondary" id="exportSummaryBtn">📤 ส่งออกรายงาน</button>
+    </div>
+    <div class="summary-grid">
+      <div class="summary-item">
+        <div class="summary-num" id="totalUniqueTanks">0</div>
+        <div class="summary-label">ถังทั้งหมด</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-num" id="tanksWithHistory">0</div>
+        <div class="summary-label">มีประวัติ</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-num" id="tanksNoHistory">0</div>
+        <div class="summary-label">ยังไม่มีประวัติ</div>
+      </div>
+    </div>
+    <div style="display:flex; gap:8px; margin-bottom:8px;">
+      <button class="browse-toggle" id="showAllSerials">แสดงรายการหมายเลขทั้งหมด</button>
+      <button class="browse-toggle" id="showStats">ดูสถิติเพิ่ม</button>
+    </div>
+    <div class="serial-list-box" id="serialListBox" style="display:none;">
+      <div class="serial-tags" id="serialTags"></div>
+    </div>
+    <div class="panel" id="statsPanel" style="margin-top:10px; padding:12px; background:var(--paper);">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:13px;">
+        <div>📅 รวมการอัดทั้งหมด: <strong id="totalRecordsStat">0</strong> ครั้ง</div>
+        <div>⚖️ น้ำหนักรวมทั้งหมด: <strong id="totalWeightStat">0</strong> กก.</div>
+        <div>📊 เฉลี่ยต่อถัง: <strong id="avgPerTank">0</strong> ครั้ง</div>
+        <div>🏭 อัปเดตล่าสุด: <strong id="lastUpdateStat">-</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔍 ค้นหา -->
+  <div class="manual-row">
+    <input type="text" id="manualSerial" placeholder="🔍 กรอกเลขถัง เช่น 2050">
+    <button class="find-btn" id="manualFind">ค้นหา</button>
+  </div>
+
+  <hr class="divider">
+  <div class="btn-row">
+    <button class="browse-toggle" id="browseToggle">ดูรายการทั้งหมด (<span id="tankCountLabel">0</span> ถัง)</button>
+    <button class="btn-primary" id="saveExcelBtn">💾 บันทึกลง Excel</button>
+    <button class="browse-toggle" id="addTankToggle">+ เพิ่มถังใหม่</button>
+    <button class="browse-toggle" id="dateViewToggle">ดูรายงานรายวัน</button>
+  </div>
+  <div id="recordCount" style="font-size:12px; color:var(--ink-soft); margin-top:6px;"></div>
+  <div class="tank-grid" id="tankGrid"></div>
+
+  <!-- เพิ่มถังใหม่ -->
+  <div id="addTankPanel" class="panel">
+    <div class="field">
+      <label>เลขถังใหม่ (เช่น 3200)</label>
+      <input type="text" id="newTankSerial" placeholder="กรอกเลขถัง">
+    </div>
+    <button class="save-btn" id="confirmAddTank">เพิ่มถังนี้ + สร้าง QR</button>
+    <div class="err" id="addTankErr">กรอกเลขถัง หรือเลขนี้มีอยู่ในระบบแล้ว</div>
+    <div id="newTankQrArea" style="display:none; margin-top:16px; text-align:center;">
+      <div class="tag-serial" style="color:var(--steel-dark); margin-bottom:10px;" id="newTankQrLabel"></div>
+      <div id="qrCanvasHolder" style="display:inline-block; padding:10px; background:#fff; border:1px solid var(--line); border-radius:8px;"></div>
+      <div style="margin-top:10px;">
+        <button class="browse-toggle" id="downloadQrBtn">ดาวน์โหลด QR</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ดูรายวัน -->
+  <div id="dateViewPanel" class="panel">
+    <div class="field-row">
+      <div class="field"><label>เลือกวันที่</label><input type="date" id="dateViewInput"></div>
+    </div>
+    <button class="save-btn" id="dateViewSearch">แสดงข้อมูลวันนี้</button>
+    <div id="dateViewResult" style="margin-top:14px;"></div>
+  </div>
+
+  <div id="resultArea"></div>
+
+  <hr class="divider">
+  <button class="browse-toggle" id="resetAllToggle" style="color:#B33A3A;">ล้างข้อมูลทั้งหมด</button>
+  <div id="resetPanel" class="panel" style="background:#FDEDED; border-color:#F0B4B4;">
+    <p style="font-size:13px; color:#B33A3A; margin:0 0 10px; line-height:1.5;">ต้องการล้างข้อมูลทั้งหมดหรือไม่? (จะยังไม่ลบไฟล์ Excel จนกว่าคุณจะบันทึกใหม่)</p>
+    <div class="field">
+      <label style="color:#B33A3A;">รหัสผ่านผู้ดูแลระบบ</label>
+      <input type="password" id="resetPassword" placeholder="กรอกรหัสผ่าน" autocomplete="off">
+    </div>
+    <div class="err" id="resetPasswordErr">รหัสผ่านไม่ถูกต้อง</div>
+    <div style="display:flex; gap:8px; margin-top:10px;">
+      <button class="browse-toggle" id="resetCancel">ยกเลิก</button>
+      <button class="save-btn" id="resetConfirm" style="background:#B33A3A;">ยืนยันล้าง</button>
+    </div>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// =====================================================
+// ⚙️ ตั้งค่า
+// =====================================================
+const ADMIN_PASSWORD = "1717";
+const EXCEL_FILENAME = "ทะเบียนถังแก๊ส.xlsx";
+
+// ข้อมูลเริ่มต้น
+const SEED_SET1 = ["2050","1126","3068","2102","2155","3165","2059","3054","2138","3118","3030","3129","3013"];
+const SEED_SET2 = ["1172","1105","1183","1108","1085","1006","1148","2011","2002","1067"];
+const ALL_TANKS = [...SEED_SET1, ...SEED_SET2];
+
+let database = {};
+let currentSerial = null;
+let originalFileName = null;
+let serialListVisible = false;
+let statsVisible = false;
+
+// =====================================================
+// 🔔 เครื่องมือช่วย
+// =====================================================
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function fmt(v) {
+  if (v === null || v === undefined || v === '') return '<span class="metric-empty">—</span>';
+  return v;
+}
+
+function sanitizeSerial(raw) {
+  return String(raw).trim().replace(/[\s\/\\'"]+/g, '');
+}
+
+function updateStatus(text, isError = false) {
+  const box = document.getElementById('statusBox');
+  if (isError) {
+    box.style.background = '#FDEDED';
+    box.style.color = '#B33A3A';
+  } else {
+    box.style.background = '#E3F3E9';
+    box.style.color = '#1D7A4C';
+  }
+  box.innerHTML = text;
+}
+
+// =====================================================
+// 📋 อัปเดตสรุปรายงานจำนวนถัง
+// =====================================================
+function updateSummaryReport() {
+  const allSerials = Object.keys(database);
+  const totalUnique = allSerials.length;
+  let withHistory = 0;
+  let totalRecords = 0;
+  let totalWeight = 0;
+
+  allSerials.forEach(serial => {
+    const records = database[serial] || [];
+    if (records.length > 0) {
+      withHistory++;
+      totalRecords += records.length;
+      records.forEach(r => {
+        if (r.before != null && r.after != null) {
+          totalWeight += (r.after - r.before);
+        }
+      });
+    }
+  });
+
+  const noHistory = totalUnique - withHistory;
+  const avgRecords = totalUnique > 0 ? (totalRecords / totalUnique).toFixed(1) : 0;
+
+  document.getElementById('totalUniqueTanks').textContent = totalUnique;
+  document.getElementById('tanksWithHistory').textContent = withHistory;
+  document.getElementById('tanksNoHistory').textContent = noHistory;
+  document.getElementById('totalRecordsStat').textContent = totalRecords;
+  document.getElementById('totalWeightStat').textContent = totalWeight.toFixed(2);
+  document.getElementById('avgPerTank').textContent = avgRecords;
+  document.getElementById('lastUpdateStat').textContent = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+
+  const tagsContainer = document.getElementById('serialTags');
+  tagsContainer.innerHTML = '';
+  allSerials.sort((a, b) => (Number(a) || 0) - (Number(b) || 0)).forEach(serial => {
+    const tag = document.createElement('span');
+    tag.className = 'serial-tag';
+    tag.textContent = serial;
+    tag.title = `มี ${(database[serial] || []).length} รายการ`;
+    tag.addEventListener('click', () => lookupTank(serial));
+    tagsContainer.appendChild(tag);
+  });
+}
+
+// ส่งออกรายงานสรุปเป็น Excel
+function exportSummaryReport() {
+  const allSerials = Object.keys(database).sort((a, b) => (Number(a) || 0) - (Number(b) || 0));
+
+  const summaryData = [
+    ['สรุปรายงานจำนวนถังแก๊ส'],
+    ['วันที่ออกรายงาน', new Date().toLocaleDateString('th-TH') + ' ' + new Date().toLocaleTimeString('th-TH')],
+    [],
+    ['สรุปภาพรวม', 'จำนวน'],
+    ['จำนวนถังทั้งหมด (Serial ไม่ซ้ำ)', allSerials.length],
+    ['ถังที่มีประวัติการอัด', allSerials.filter(s => (database[s] || []).length > 0).length],
+    ['ถังที่ยังไม่มีประวัติ', allSerials.filter(s => (database[s] || []).length === 0).length],
+    [],
+    ['รายการหมายเลขถังแก๊ส'],
+    ['ลำดับ', 'หมายเลข Serial', 'จำนวนครั้งที่อัด', 'สถานะ']
+  ];
+
+  allSerials.forEach((serial, idx) => {
+    const count = (database[serial] || []).length;
+    summaryData.push([idx + 1, serial, count, count > 0 ? 'มีประวัติ' : 'ยังไม่มีประวัติ']);
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(summaryData);
+  ws['!cols'] = [{ wch: 15 }, { wch: 20 }, { wch: 15 }, { wch: 18 }];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "สรุปรายงานถังแก๊ส");
+
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const filename = `สรุปรายงานถังแก๊ส_${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}.xlsx`;
+  XLSX.writeFile(wb, filename);
+  toast('✅ ส่งออกรายงานสรุปสำเร็จ!');
+}
+
+// =====================================================
+// 📂 อ่านไฟล์ Excel เข้าสู่ระบบ
+// =====================================================
+function parseExcelToDB(workbook) {
+  const data = {};
+  const sheet = workbook.Sheets["ประวัติการอัดแก๊ส"] || workbook.Sheets[workbook.SheetNames[0]];
+  if (!sheet) return data;
+
+  const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+  if (json.length < 3) return data;
+
+  const headers = json[1] || [];
+  const colMap = {};
+  headers.forEach((h, i) => {
+    if (h === "เลขถังแก๊ส") colMap.serial = i;
+    else if (h === "ครั้งที่") colMap.round = i;
+    else if (h === "วันที่") colMap.date = i;
+    else if (h === "น้ำหนักก่อนอัด") colMap.before = i;
+    else if (h === "น้ำหนักหลังอัด") colMap.after = i;
+    else if (h === "แรงดัน") colMap.pressure = i;
+    else if (h === "CH4") colMap.ch4 = i;
+    else if (h === "CO2") colMap.co2 = i;
+    else if (h === "H2S") colMap.h2s = i;
+    else if (h === "มิเตอร์เริ่ม") colMap.meterStart = i;
+    else if (h === "มิเตอร์จบ") colMap.meterFinish = i;
+  });
+
+  for (let i = 2; i < json.length; i++) {
+    const row = json[i];
+    const serial = String(row[colMap.serial] || '').trim();
+    if (!serial || serial.includes('รวม')) continue;
+
+    if (!data[serial]) data[serial] = [];
+    data[serial].push({
+      round: Number(row[colMap.round]) || 0,
+      date: row[colMap.date] || '',
+      before: row[colMap.before] ? Number(row[colMap.before]) : null,
+      after: row[colMap.after] ? Number(row[colMap.after]) : null,
+      pressure: row[colMap.pressure] ? Number(row[colMap.pressure]) : null,
+      ch4: row[colMap.ch4] ? Number(row[colMap.ch4]) : null,
+      co2: row[colMap.co2] ? Number(row[colMap.co2]) : null,
+      h2s: row[colMap.h2s] ? Number(row[colMap.h2s]) : null,
+      meterStart: row[colMap.meterStart] ? Number(row[colMap.meterStart]) : null,
+      meterFinish: row[colMap.meterFinish] ? Number(row[colMap.meterFinish]) : null
+    });
+  }
+
+  Object.values(data).forEach(records => {
+    records.sort((a, b) => (a.round || 0) - (b.round || 0));
+  });
+
+  return data;
+}
+
+// =====================================================
+// 💾 สร้างและบันทึกไฟล์ Excel
+// =====================================================
+function exportDBToExcel() {
+  const tankData = Object.entries(database).map(([serial, records]) => ({
+    serial, records: (records || []).sort((a, b) => (a.round || 0) - (b.round || 0))
+  }));
+  tankData.sort((a, b) => (Number(a.serial) || 0) - (Number(b.serial) || 0));
+
+  const subHeaders = ["ครั้งที่", "วันที่", "น้ำหนักก่อนอัด", "น้ำหนักหลังอัด", "น้ำหนักเพิ่ม", "แรงดัน", "CH4", "CO2", "H2S", "มิเตอร์เริ่ม", "มิเตอร์จบ", "มิเตอร์รวม"];
+  const blockWidth = subHeaders.length;
+  const maxRounds = Math.max(1, ...tankData.map(t => t.records.length));
+
+  const headerRow1 = ["เลขถังแก๊ส"];
+  const headerRow2 = [""];
+  for (let r = 1; r <= maxRounds; r++) {
+    headerRow1.push("ครั้งที่ " + r, ...Array(blockWidth - 1).fill(""));
+    headerRow2.push(...subHeaders);
+  }
+  headerRow1.push("น้ำหนักรวมทุกครั้ง");
+  headerRow2.push("");
+
+  const aoa = [headerRow1, headerRow2];
+  const merges = [{ s: { r: 0, c: 0 }, e: { r: 1, c: 0 } }];
+  let mcol = 1;
+  for (let r = 1; r <= maxRounds; r++) {
+    merges.push({ s: { r: 0, c: mcol }, e: { r: 0, c: mcol + blockWidth - 1 } });
+    mcol += blockWidth;
+  }
+  merges.push({ s: { r: 0, c: mcol }, e: { r: 1, c: mcol } });
+
+  tankData.forEach(t => {
+    const row = [Number(t.serial) || t.serial];
+    let totalWeight = 0;
+    for (let r = 0; r < maxRounds; r++) {
+      const rec = t.records[r];
+      if (rec) {
+        const net = (rec.before != null && rec.after != null) ? Number((rec.after - rec.before).toFixed(2)) : '';
+        const meterTotal = (rec.meterStart != null && rec.meterFinish != null)
+          ? Number((rec.meterFinish - rec.meterStart).toFixed(2)) : '';
+        row.push(rec.round ?? (r + 1), rec.date ?? '', rec.before ?? '', rec.after ?? '', net,
+          rec.pressure ?? '', rec.ch4 ?? '', rec.co2 ?? '', rec.h2s ?? '',
+          rec.meterStart ?? '', rec.meterFinish ?? '', meterTotal);
+        if (rec.before != null && rec.after != null) totalWeight += (rec.after - rec.before);
+      } else {
+        for (let i = 0; i < blockWidth; i++) row.push('');
+      }
+    }
+    row.push(Number(totalWeight.toFixed(2)));
+    aoa.push(row);
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!merges'] = merges;
+  const cols = [{ wch: 12 }];
+  for (let r = 0; r < maxRounds; r++) {
+    cols.push({ wch: 7 }, { wch: 12 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 9 }, { wch: 7 }, { wch: 7 }, { wch: 6 }, { wch: 12 }, { wch: 12 }, { wch: 10 });
+  }
+  cols.push({ wch: 16 });
+  ws['!cols'] = cols;
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "ประวัติการอัดแก๊ส");
+
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const stamp = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}`;
+  const filename = originalFileName ? originalFileName.replace('.xlsx', '') + '_' + stamp + '.xlsx' : 'ทะเบียนถังแก๊ส_' + stamp + '.xlsx';
+
+  XLSX.writeFile(wb, filename);
+  return filename;
+}
+
+// =====================================================
+// 📂 จัดการอัปโหลดไฟล์ Excel
+// =====================================================
+const dropArea = document.getElementById('dropArea');
+const fileInput = document.getElementById('fileInput');
+
+dropArea.addEventListener('click', () => fileInput.click());
+dropArea.addEventListener('dragover', e => { e.preventDefault(); dropArea.classList.add('dragover'); });
+dropArea.addEventListener('dragleave', () => dropArea.classList.remove('dragover'));
+dropArea.addEventListener('drop', e => {
+  e.preventDefault(); dropArea.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) handleFile(file);
+});
+fileInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (file) handleFile(file);
+});
+
+function handleFile(file) {
+  if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+    updateStatus('❌ รองรับเฉพาะไฟล์ .xlsx หรือ .xls เท่านั้น', true);
+    return;
+  }
+  originalFileName = file.name;
+  document.getElementById('fileInfo').innerHTML = `✅ โหลดไฟล์: <strong>${file.name}</strong> (${(file.size / 1024).toFixed(1)} KB)`;
+  updateStatus('⏳ กำลังอ่านข้อมูลจากไฟล์ Excel...');
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      database = parseExcelToDB(workbook);
+
+      if (Object.keys(database).length === 0) {
+        ALL_TANKS.forEach(serial => database[serial] = []);
+        updateStatus(`✅ อ่านไฟล์สำเร็จ — เริ่มต้นด้วย ${ALL_TANKS.length} ถัง`);
+      } else {
+        updateStatus(`✅ อ่านไฟล์สำเร็จ — โหลดข้อมูล ${Object.keys(database).length} ถัง`);
+      }
+
+      buildTankGrid();
+      updateRecordCount();
+      updateSummaryReport();
+      toast('โหลดข้อมูลจากไฟล์เรียบร้อย!');
+    } catch (err) {
+      console.error(err);
+      updateStatus('❌ อ่านไฟล์ไม่สำเร็จ: ' + err.message, true);
+      toast('อ่านไฟล์ไม่สำเร็จ');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// =====================================================
+// 📊 โหลดข้อมูลเริ่มต้น
+// =====================================================
+function initDatabase() {
+  ALL_TANKS.forEach(serial => {
+    if (!database[serial]) database[serial] = [];
+  });
+  buildTankGrid();
+  updateRecordCount();
+  updateSummaryReport();
+  updateStatus(`✅ พร้อมทำงาน — มี ${Object.keys(database).length} ถังในระบบ`);
+}
+
+function buildTankGrid() {
+  const grid = document.getElementById('tankGrid');
+  grid.innerHTML = '';
+
+  const serials = Object.keys(database);
+  serials.sort((a, b) => (Number(a) || 0) - (Number(b) || 0));
+
+  document.getElementById('tankCountLabel').textContent = serials.length;
+
+  serials.forEach(serial => {
+    const chip = document.createElement('div');
+    chip.className = 'tank-chip';
+    chip.textContent = serial;
+    chip.addEventListener('click', () => lookupTank(serial));
+    grid.appendChild(chip);
+  });
+}
+
+function updateRecordCount() {
+  let totalRecords = 0;
+  Object.values(database).forEach(records => {
+    totalRecords += Array.isArray(records) ? records.length : 0;
+  });
+  document.getElementById('recordCount').textContent =
+    `บันทึกไว้ทั้งหมด ${totalRecords} รายการ จาก ${Object.keys(database).length} ถัง — กด "บันทึกลง Excel" เพื่อสร้างไฟล์ใหม่`;
+}
+
+// =====================================================
+// 🔍 ค้นหาและแสดงผล
+// =====================================================
+function lookupTank(serial) {
+  serial = sanitizeSerial(serial);
+  if (!serial) return;
+  currentSerial = serial;
+
+  const records = database[serial] || [];
+  renderResult(serial, records);
+  window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+}
+
+function renderResult(serial, records) {
+  const area = document.getElementById('resultArea');
+  const sorted = [...records].sort((a, b) => (a.round || 0) - (b.round || 0));
+
+  let historyHtml = '';
+  let totalWeight = 0;
+
+  if (sorted.length === 0) {
+    historyHtml = '<div class="not-found">ยังไม่มีประวัติการอัดของถังนี้</div>';
+  } else {
+    let running = 0;
+    historyHtml = sorted.map(r => {
+      const net = (r.before != null && r.after != null) ? (r.after - r.before) : null;
+      if (net != null) running += net;
+      return `
+      <div class="history-item">
+        <div class="hist-row1">
+          <span class="hist-round">ครั้งที่ ${fmt(r.round)}</span>
+          <span class="hist-date">${fmt(r.date)}</span>
+        </div>
+        <div class="hist-metrics">
+          <div><span class="metric-label">ก่อนอัด </span><span class="metric-val">${fmt(r.before)}</span></div>
+          <div><span class="metric-label">หลังอัด </span><span class="metric-val">${fmt(r.after)}</span></div>
+          <div><span class="metric-label">น้ำหนัก </span><span class="metric-val">${net != null ? net.toFixed(2) + ' กก.' : fmt(null)}</span></div>
+          <div><span class="metric-label">แรงดัน </span><span class="metric-val">${fmt(r.pressure)}</span></div>
+          <div><span class="metric-label">CH4 </span><span class="metric-val">${fmt(r.ch4)}</span></div>
+          <div><span class="metric-label">CO2 </span><span class="metric-val">${fmt(r.co2)}</span></div>
+          <div><span class="metric-label">H2S </span><span class="metric-val">${fmt(r.h2s)}</span></div>
+          <div><span class="metric-label">มิเตอร์เริ่ม </span><span class="metric-val">${fmt(r.meterStart)}</span></div>
+          <div><span class="metric-label">มิเตอร์จบ </span><span class="metric-val">${fmt(r.meterFinish)}</span></div>
+        </div>
+      </div>
+    `;
+    }).join('');
+    totalWeight = running;
+  }
+
+  const nextRound = sorted.length > 0 ? Math.max(...sorted.map(r => r.round || 0)) + 1 : 1;
+  const today = new Date().toISOString().slice(0, 10);
+
+  area.innerHTML = `
+    <div class="result-card">
+      <div class="result-head">
+        <div>
+          <div class="tag-serial">#${serial}</div>
+          <div class="tag-sub">ประวัติการอัด ${sorted.length} ครั้ง · น้ำหนักรวม ${totalWeight.toFixed(2)} กก.</div>
+        </div>
+      </div>
+      <div>${historyHtml}</div>
+      <div style="padding:0 16px 14px;">
+        <button class="add-btn" id="toggleAddForm">+ บันทึกการอัดครั้งใหม่</button>
+      </div>
+      <div class="add-form" id="addForm">
+        <div class="field-row">
+          <div class="field"><label>วันที่</label><input type="date" id="f_date" value="${today}"></div>
+          <div class="field"><label>ครั้งที่</label><input type="number" id="f_round" value="${nextRound}"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>น้ำหนักก่อนอัด (กก.)</label><input type="number" step="0.01" id="f_before"></div>
+          <div class="field"><label>น้ำหนักหลังอัด (กก.)</label><input type="number" step="0.01" id="f_after"></div>
+        </div>
+        <div class="field"><label>แรงดันแก๊ส (bar)</label><input type="number" step="0.01" id="f_pressure"></div>
+        <div class="field-row">
+          <div class="field"><label>CH4 (%)</label><input type="number" step="0.01" id="f_ch4"></div>
+          <div class="field"><label>CO2 (%)</label><input type="number" step="0.01" id="f_co2"></div>
+          <div class="field"><label>H2S (ppm)</label><input type="number" step="1" id="f_h2s"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>มิเตอร์เริ่ม</label><input type="number" step="0.01" id="f_meterStart"></div>
+          <div class="field"><label>มิเตอร์สิ้นสุด</label><input type="number" step="0.01" id="f_meterFinish"></div>
+        </div>
+        <div class="err" id="formErr">กรอกน้ำหนักก่อนและหลังอัดก่อนบันทึก</div>
+        <button class="save-btn" id="saveRecord">บันทึกข้อมูล</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('toggleAddForm').addEventListener('click', () => {
+    document.getElementById('addForm').classList.toggle('open');
+  });
+
+  document.getElementById('saveRecord').addEventListener('click', () => {
+    const before = document.getElementById('f_before').value;
+    const after = document.getElementById('f_after').value;
+    const errEl = document.getElementById('formErr');
+    if (!before || !after) { errEl.style.display = 'block'; return; }
+    errEl.style.display = 'none';
+
+    const newRecord = {
+      round: Number(document.getElementById('f_round').value) || nextRound,
+      date: document.getElementById('f_date').value || today,
+      before: Number(before),
+      after: Number(after),
+      pressure: document.getElementById('f_pressure').value ? Number(document.getElementById('f_pressure').value) : null,
+      ch4: document.getElementById('f_ch4').value ? Number(document.getElementById('f_ch4').value) : null,
+      co2: document.getElementById('f_co2').value ? Number(document.getElementById('f_co2').value) : null,
+      h2s: document.getElementById('f_h2s').value ? Number(document.getElementById('f_h2s').value) : null,
+      meterStart: document.getElementById('f_meterStart').value ? Number(document.getElementById('f_meterStart').value) : null,
+      meterFinish: document.getElementById('f_meterFinish').value ? Number(document.getElementById('f_meterFinish').value) : null
+    };
+
+    if (!database[serial]) database[serial] = [];
+    database[serial].push(newRecord);
+    database[serial].sort((a, b) => (a.round || 0) - (b.round || 0));
+
+    toast('✅ บันทึกข้อมูลแล้ว!');
+    renderResult(serial, database[serial]);
+    buildTankGrid();
+    updateRecordCount();
+    updateSummaryReport();
+  });
+}
+
+// =====================================================
+// 📅 ดูรายงานรายวัน
+// =====================================================
+function renderDateView(dateStr) {
+  const resultBox = document.getElementById('dateViewResult');
+  if (!dateStr) {
+    resultBox.innerHTML = '<div class="not-found">กรุณาเลือกวันที่ก่อนครับ</div>';
+    return;
+  }
+
+  const matches = [];
+  Object.entries(database).forEach(([serial, records]) => {
+    (records || []).forEach(r => {
+      if (r.date === dateStr) matches.push({ serial, ...r });
+    });
+  });
+
+  if (matches.length === 0) {
+    resultBox.innerHTML = `<div class="not-found">ไม่พบข้อมูลการอัดในวันที่ ${dateStr}</div>`;
+    return;
+  }
+
+  matches.sort((a, b) => (Number(a.serial) || 0) - (Number(b.serial) || 0));
+
+  let totalWeight = 0;
+  const itemsHtml = matches.map(m => {
+    const net = (m.before != null && m.after != null) ? (m.after - m.before) : null;
+    if (net != null) totalWeight += net;
+    return `
+      <div class="dv-item">
+        <span class="dv-serial">#${m.serial} (ครั้งที่ ${fmt(m.round)})</span>
+        <span>${net != null ? net.toFixed(2) + ' กก.' : '—'}</span>
+      </div>
+    `;
+  }).join('');
+
+  resultBox.innerHTML = `
+    <div style="font-size:13px; color:var(--ink-soft); margin-bottom:10px;">
+      พบ ${matches.length} รายการ · น้ำหนักรวม ${totalWeight.toFixed(2)} กก.
+    </div>
+    ${itemsHtml}
+  `;
+}
+
+// =====================================================
+// 🎯 Event Listeners
+// =====================================================
+document.getElementById('manualFind').addEventListener('click', () => {
+  lookupTank(document.getElementById('manualSerial').value);
+});
+document.getElementById('manualSerial').addEventListener('keydown', e => {
+  if (e.key === 'Enter') lookupTank(e.target.value);
+});
+
+document.getElementById('browseToggle').addEventListener('click', () => {
+  const grid = document.getElementById('tankGrid');
+  grid.style.display = grid.style.display !== 'none' ? 'none' : 'grid';
+});
+
+// 💾 บันทึกลง Excel
+document.getElementById('saveExcelBtn').addEventListener('click', () => {
+  if (Object.keys(database).length === 0) {
+    toast('❌ ไม่มีข้อมูลที่จะบันทึก กรอกข้อมูลก่อนครับ');
+    return;
+  }
+  const filename = exportDBToExcel();
+  updateSummaryReport();
+  updateStatus(`✅ บันทึกสำเร็จ! ไฟล์: <strong>${filename}</strong><br>📌 นำไปแทนที่ใน OneDrive เพื่อให้ทีมงานเห็นข้อมูลล่าสุด`);
+  toast('✅ สร้างไฟล์ Excel เรียบร้อย!');
+});
+
+// 📋 แสดงรายการ Serial ทั้งหมด
+document.getElementById('showAllSerials').addEventListener('click', () => {
+  serialListVisible = !serialListVisible;
+  document.getElementById('serialListBox').style.display = serialListVisible ? 'block' : 'none';
+  if (serialListVisible) updateSummaryReport();
+});
+
+// 📊 แสดงสถิติเพิ่ม
+document.getElementById('showStats').addEventListener('click', () => {
+  statsVisible = !statsVisible;
+  document.getElementById('statsPanel').style.display = statsVisible ? 'block' : 'none';
+  if (statsVisible) updateSummaryReport();
+});
+
+// 📤 ส่งออกรายงานสรุป
+document.getElementById('exportSummaryBtn').addEventListener('click', exportSummaryReport);
+
+// เพิ่มถังใหม่
+document.getElementById('addTankToggle').addEventListener('click', () => {
+  const panel = document.getElementById('addTankPanel');
+  panel.style.display = panel.style.display === 'none' || !panel.style.display ? 'block' : 'none';
+});
+
+document.getElementById('confirmAddTank').addEventListener('click', () => {
+  const serial = sanitizeSerial(document.getElementById('newTankSerial').value);
+  const errEl = document.getElementById('addTankErr');
+  const qrArea = document.getElementById('newTankQrArea');
+
+  if (!serial) {
+    errEl.textContent = 'กรุณากรอกเลขถัง';
+    errEl.style.display = 'block';
+    qrArea.style.display = 'none';
+    return;
+  }
+
+  if (database[serial]) {
+    errEl.textContent = 'เลขถังนี้มีอยู่ในระบบแล้ว';
+    errEl.style.display = 'block';
+    qrArea.style.display = 'none';
+    return;
+  }
+
+  errEl.style.display = 'none';
+  database[serial] = [];
+  toast('✅ เพิ่มถัง #' + serial + ' แล้ว');
+  buildTankGrid();
+  updateRecordCount();
+  updateSummaryReport();
+
+  // สร้าง QR code สำหรับถังใหม่
+  document.getElementById('newTankQrLabel').textContent = '#' + serial;
+  const qrHolder = document.getElementById('qrCanvasHolder');
+  qrHolder.innerHTML = '';
+  new QRCode(qrHolder, {
+    text: serial,
+    width: 150,
+    height: 150,
+    colorDark: "#1C4353",
+    colorLight: "#ffffff",
+    correctLevel: QRCode.CorrectLevel.M
+  });
+  qrArea.style.display = 'block';
+  document.getElementById('newTankSerial').value = '';
+});
+
+// ดาวน์โหลด QR
+document.getElementById('downloadQrBtn').addEventListener('click', () => {
+  const qrHolder = document.getElementById('qrCanvasHolder');
+  const img = qrHolder.querySelector('img');
+  const canvas = qrHolder.querySelector('canvas');
+  const label = document.getElementById('newTankQrLabel').textContent || 'tank';
+  const a = document.createElement('a');
+  a.download = `QR_${label.replace('#', '')}.png`;
+
+  if (canvas) {
+    a.href = canvas.toDataURL('image/png');
+  } else if (img) {
+    a.href = img.src;
+  } else {
+    toast('ไม่พบ QR code ให้ดาวน์โหลด');
+    return;
+  }
+  a.click();
+  toast('✅ ดาวน์โหลด QR แล้ว');
+});
+
+// ดูรายงานรายวัน
+document.getElementById('dateViewToggle').addEventListener('click', () => {
+  const panel = document.getElementById('dateViewPanel');
+  const willOpen = panel.style.display === 'none' || !panel.style.display;
+  panel.style.display = willOpen ? 'block' : 'none';
+  if (willOpen && !document.getElementById('dateViewInput').value) {
+    document.getElementById('dateViewInput').value = new Date().toISOString().slice(0, 10);
+  }
+});
+
+document.getElementById('dateViewSearch').addEventListener('click', () => {
+  renderDateView(document.getElementById('dateViewInput').value);
+});
+
+// ล้างข้อมูลทั้งหมด
+document.getElementById('resetAllToggle').addEventListener('click', () => {
+  const panel = document.getElementById('resetPanel');
+  panel.style.display = panel.style.display === 'none' || !panel.style.display ? 'block' : 'none';
+  document.getElementById('resetPassword').value = '';
+  document.getElementById('resetPasswordErr').style.display = 'none';
+});
+
+document.getElementById('resetCancel').addEventListener('click', () => {
+  document.getElementById('resetPanel').style.display = 'none';
+  document.getElementById('resetPassword').value = '';
+  document.getElementById('resetPasswordErr').style.display = 'none';
+});
+
+document.getElementById('resetConfirm').addEventListener('click', () => {
+  const pw = document.getElementById('resetPassword').value;
+  const errEl = document.getElementById('resetPasswordErr');
+  if (pw !== ADMIN_PASSWORD) {
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+
+  database = {};
+  originalFileName = null;
+  document.getElementById('fileInfo').innerHTML = '';
+  document.getElementById('resultArea').innerHTML = '';
+  document.getElementById('resetPanel').style.display = 'none';
+  document.getElementById('resetPassword').value = '';
+
+  initDatabase();
+  toast('🗑️ ล้างข้อมูลทั้งหมดแล้ว (ยังไม่ได้บันทึกไฟล์)');
+});
+
+// =====================================================
+// 🚀 เริ่มต้นระบบ
+// =====================================================
+initDatabase();
+</script>
+</body>
+</html>
