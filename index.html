@@ -10,24 +10,19 @@
     * { box-sizing: border-box; font-family: "Segoe UI", sans-serif; margin: 0; padding: 0; }
     body { background: #f5f5f0; padding: 16px; max-width: 100%; margin: 0 auto; color: #333; overflow-x: auto; }
 
-    /* ===== แจ้งเตือน ===== */
     .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 14px; font-size: 14px; line-height: 1.5; }
-    .alert-error { background: #fef2f2; border-left:4px solid #ef4444; color:#b91c1c; }
-    .alert-success { background: #f0fdf4; border-left:4px solid #22c55e; color:#166534; }
+    .alert-error { background: #fef2f2; border-left: 4px solid #ef4444; color: #b91c1c; }
+    .alert-success { background: #f0fdf4; border-left: 4px solid #22c55e; color: #166534; }
 
-    /* ===== ส่วนหัวข้อมูลถัง ===== */
     .tank-header { background: #2B5F75; color: white; padding: 16px; border-radius: 10px 10px 0 0; }
     .tank-serial { font-size: 22px; font-weight: bold; margin-bottom: 4px; }
     .tank-stats { font-size: 14px; opacity: 0.9; }
 
-    /* ===== ข้อความว่าง ===== */
     .empty-note { background: #f9f6f0; padding: 18px; text-align: center; color: #666; font-size: 15px; }
 
-    /* ===== ปุ่มเพิ่มบันทึก ===== */
     .btn-add { width: 100%; background: #d4edda; color: #155724; border: none; padding: 14px; font-size: 16px; border-radius: 8px; cursor: pointer; margin: 12px 0; font-weight: 500; }
     .btn-add:hover { background: #c3e6cb; }
 
-    /* ===== ฟอร์มบันทึก ===== */
     .form-container { background: #f9f6f0; padding: 20px; border-radius: 0 0 10px 10px; max-width: 700px; margin: 0 auto; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
     .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
@@ -36,15 +31,13 @@
     input { padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 15px; background: #fff; }
     input:focus { outline: none; border-color: #2B5F75; box-shadow: 0 0 0 2px rgba(43,95,117,0.15); }
 
-    /* ===== ปุ่ม ===== */
     .btn-submit { width: 100%; background: #2B5F75; color: white; border: none; padding: 14px; font-size: 17px; border-radius: 8px; cursor: pointer; margin-top: 8px; font-weight: 500; }
     .btn-submit:hover { background: #1C4353; }
-    .btn-danger { width: 100%; background: #dc2626; color: white; border: none; padding: 10px; font-size: 14px; border-radius: 8px; cursor: pointer; margin-top: 8px; }
+    .btn-danger { background: #dc2626; color: white; border: none; padding: 10px 14px; font-size: 14px; border-radius: 8px; cursor: pointer; }
     .btn-danger:hover { background: #b91c1c; }
     .btn-danger-small { background: #dc2626; color: white; border: none; padding: 4px 10px; font-size: 12px; border-radius: 6px; cursor: pointer; }
     .btn-danger-small:hover { background: #b91c1c; }
 
-    /* ===== ส่วนควบคุมด้านบน ===== */
     .top-controls { margin-bottom: 16px; max-width: 700px; margin-left: auto; margin-right: auto; }
     .btn-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
     .btn { padding: 10px 14px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; }
@@ -56,13 +49,11 @@
     .search-row input { flex: 1; }
     .action-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 
-    /* ===== กล้องสแกน ===== */
     .scan-box { position: relative; width: 100%; max-width: 420px; margin: 10px auto; border-radius: 10px; overflow: hidden; border: 3px solid #2B5F75; background: #000; }
     video { width: 100%; height: auto; display: block; }
     .scan-frame { position: absolute; inset: 0; border: 2px solid #E8A33D; box-shadow: inset 0 0 0 9999px rgba(0,0,0,0.4); pointer-events: none; }
     .hidden { display: none !important; }
 
-    /* ===== ตารางประวัติ ===== */
     .history-section { margin-top: 20px; }
     .history-title { font-size: 15px; font-weight: 600; margin-bottom: 10px; color: #333; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
     .table-wrap { overflow-x: auto; border-radius: 6px; border: 1px solid #1C4353; background: white; }
@@ -121,7 +112,6 @@
       background: #f8f9fa; 
     }
 
-    /* ===== รายการถังทั้งหมด ===== */
     .tank-list { background: white; border-radius: 10px; padding: 14px; margin-top: 14px; border: 1px solid #e5e5e5; max-width: 700px; margin-left: auto; margin-right: auto; }
     .tank-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
     .tank-item:hover { background: #f9f6f0; }
@@ -133,21 +123,21 @@
     .status-active { background: #dcfce7; color: #166534; }
     .status-empty { background: #fef3c7; color: #92400e; }
 
-    /* ===== Modal ยืนยันรหัสผ่าน ===== */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-    .modal { background: white; border-radius: 12px; padding: 24px; width: 100%; max-width: 360px; }
+    .modal { background: white; border-radius: 12px; padding: 24px; width: 100%; max-width: 360px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
     .modal-title { font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #333; }
-    .modal-text { font-size: 14px; color: #555; margin-bottom: 16px; line-height: 1.5; }
+    .modal-text { font-size: 14px; color: #555; margin-bottom: 16px; line-height: 1.5; white-space: pre-line; }
     .modal-error { color: #dc2626; font-size: 13px; margin-top: 6px; min-height: 18px; }
     .modal-buttons { display: flex; gap: 8px; margin-top: 16px; }
     .modal-buttons button { flex: 1; padding: 10px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; }
     .btn-cancel { background: #e5e7eb; color: #333; }
+    .btn-cancel:hover { background: #d1d5db; }
     .btn-confirm { background: #dc2626; color: white; }
+    .btn-confirm:hover { background: #b91c1c; }
   </style>
 </head>
 <body>
 
-<!-- แจ้งเตือน -->
 <div class="alert alert-error" id="secureWarning">
   ⚠️ เปิดผ่านไฟล์ในเครื่อง — กล้องจะไม่ทำงาน แนะนำให้พิมพ์เลขถังหรืออัปโหลดขึ้น OneDrive/Google Drive เพื่อใช้กล้อง
 </div>
@@ -155,7 +145,6 @@
   ✅ เปิดผ่าน HTTPS — กล้องพร้อมใช้งาน! กดปุ่ม "เปิดกล้องสแกน" เพื่อเริ่ม
 </div>
 
-<!-- ===== ส่วนควบคุม: สแกน / ค้นหา ===== -->
 <div class="top-controls">
   <div class="btn-bar">
     <button class="btn btn-primary" id="btnScan">📷 เปิดกล้องสแกน</button>
@@ -163,217 +152,160 @@
     <input type="file" id="fileQr" accept="image/*" class="hidden" />
   </div>
 
-  <!-- กล้องสแกน -->
   <div class="scan-box hidden" id="scanWrap">
     <video id="video" autoplay playsinline muted></video>
     <div class="scan-frame"></div>
   </div>
 
   <div class="search-row">
-    <input type="text" id="serialInput" placeholder="เลขถัง เช่น 1006" />
+    <input type="text" id="serialInput" placeholder="พิมพ์เลขถัง เช่น 1009" />
     <button class="btn btn-primary" id="btnSearch">ค้นหา</button>
   </div>
 
-  <!-- 🆕 ปุ่มดาวน์โหลด 3 ปุ่ม -->
   <div class="action-bar">
-    <button class="btn btn-ghost" id="btnAllTanks">📋 ดูรายการถังทั้งหมด (<span id="tankCount">0</span>)</button>
-    <button class="btn btn-ghost" id="btnExportTanks">📥 ดาวโหลดรหัสถังทั้งหมด</button>
-    <button class="btn btn-ghost" id="btnExportDaily">📅 ดาวโหลดประวัติการอัดแก๊สรายวัน</button>
-    <button class="btn btn-ghost" id="btnExportAll">📊 ดาวโหลดประวัติการอัดแก๊สทั้งหมด</button>
-    <button class="btn btn-danger" id="btnDeleteAll" style="padding:10px 14px; font-size:14px;">🗑️ ลบข้อมูลทั้งหมด</button>
+    <button class="btn btn-ghost" id="btnAllTanks">📋 รายการถังทั้งหมด (<span id="tankCount">0</span>)</button>
+    <button class="btn btn-ghost" id="btnExportTanks">📥 รหัสถังทั้งหมด</button>
+    <button class="btn btn-ghost" id="btnExportDaily">📅 ประวัติรายวัน</button>
+    <button class="btn btn-ghost" id="btnExportAll">📊 ประวัติทั้งหมด</button>
+    <button class="btn btn-danger" id="btnDeleteAll">🗑️ ลบทั้งหมด</button>
   </div>
 </div>
 
-<!-- ===== รายการถังทั้งหมด ===== -->
 <div class="tank-list hidden" id="tankListContainer">
   <div style="font-weight:600; margin-bottom:10px; color:#333;">📋 รายการถังแก๊สทั้งหมด</div>
   <div id="tankList"></div>
   <button class="btn btn-ghost" style="margin-top:10px; width:100%;" id="btnCloseTankList">ปิดรายการ</button>
 </div>
 
-<!-- ===== ข้อมูลหัวถัง ===== -->
-<div class="tank-header" style="max-width: 700px; margin-left: auto; margin-right: auto;">
+<div class="tank-header" id="tankHeader">
   <div class="tank-serial" id="tankSerial">#1009</div>
-  <div class="tank-stats" id="tankStats">ประวัติการอัด 0 ครั้ง · น้ำหนักแก๊สอัดรวม 0.00 กก.</div>
+  <div class="tank-stats" id="tankStats">ประวัติการอัด 0 ครั้ง · น้ำหนักรวม 0.00 กก.</div>
 </div>
 
-<!-- ===== ข้อความเมื่อยังไม่มีประวัติ ===== -->
-<div class="empty-note" id="emptyNote" style="max-width: 700px; margin-left: auto; margin-right: auto;">ยังไม่มีประวัติการอัดของถังนี้</div>
+<div class="empty-note" id="emptyNote">ยังไม่มีประวัติการอัดของถังนี้</div>
 
-<!-- ===== ปุ่มบันทึกการอัดใหม่ ===== -->
-<div style="max-width: 700px; margin-left: auto; margin-right: auto;">
+<div style="max-width:700px; margin:0 auto;">
   <button class="btn-add" id="toggleForm">+ บันทึกการอัดครั้งใหม่</button>
 </div>
 
-<!-- ===== ฟอร์มบันทึก ===== -->
 <div class="form-container hidden" id="formContainer">
   <div class="form-row">
     <div class="form-group">
-      <label>วันที่</label>
+      <label>📅 วันที่</label>
       <input type="date" id="fDate" />
     </div>
     <div class="form-group">
-      <label>ครั้งที่</label>
+      <label>🔢 ครั้งที่</label>
       <input type="number" id="fRound" value="1" readonly />
     </div>
   </div>
 
   <div class="form-row">
     <div class="form-group">
-      <label>น้ำหนักก่อนอัด (กก.)</label>
+      <label>⚖️ น้ำหนักก่อนอัด (กก.)</label>
       <input type="number" step="0.01" id="fBefore" placeholder="0.00" />
     </div>
     <div class="form-group">
-      <label>น้ำหนักหลังอัด (กก.)</label>
+      <label>⚖️ น้ำหนักหลังอัด (กก.)</label>
       <input type="number" step="0.01" id="fAfter" placeholder="0.00" />
     </div>
   </div>
 
   <div class="form-group" style="margin-bottom:14px;">
-    <label>แรงดันแก๊ส</label>
+    <label>📊 แรงดันแก๊ส</label>
     <input type="number" step="0.01" id="fPress" placeholder="0.00" />
   </div>
 
   <div class="form-row-3">
     <div class="form-group">
-      <label>CH4</label>
+      <label>CH4 (%)</label>
       <input type="number" step="0.01" id="fCH4" placeholder="—" />
     </div>
     <div class="form-group">
-      <label>CO2</label>
+      <label>CO2 (%)</label>
       <input type="number" step="0.01" id="fCO2" placeholder="—" />
     </div>
     <div class="form-group">
-      <label>H2S</label>
+      <label>H2S (ppm)</label>
       <input type="number" step="0.01" id="fH2S" placeholder="—" />
     </div>
   </div>
 
   <div class="form-row">
     <div class="form-group">
-      <label>Gas Meter Start</label>
+      <label>📏 มิเตอร์เริ่ม</label>
       <input type="number" id="fMStart" placeholder="—" />
     </div>
     <div class="form-group">
-      <label>Gas Meter Finish</label>
+      <label>📏 มิเตอร์สิ้นสุด</label>
       <input type="number" id="fMEnd" placeholder="—" />
     </div>
   </div>
 
-  <button class="btn-submit" id="btnSave">บันทึก</button>
+  <button class="btn-submit" id="btnSave">✅ บันทึกข้อมูล</button>
 </div>
 
-<!-- ===== ส่วนประวัติการอัด ===== -->
 <div class="history-section" id="historySection" style="display:none;">
   <div class="history-title">
-    <span>📋 ประวัติการอัดทั้งหมด (แถวละถัง · คอลัมน์ละครั้ง)</span>
+    <span>📋 ประวัติการอัด (แยกตามครั้ง)</span>
     <button class="btn btn-danger-small" id="btnClearHistory">🗑️ ลบประวัติถังนี้</button>
   </div>
   <div class="table-wrap">
     <table class="history-table" id="historyTable">
       <thead>
         <tr>
-          <th class="serial-col" rowspan="2">เลขถังแก๊ส</th>
-          <th class="round-group" colspan="12">ครั้งที่ 1</th>
-          <th class="round-group" colspan="12">ครั้งที่ 2</th>
-          <th class="round-group" colspan="12">ครั้งที่ 3</th>
-          <th class="total-col" rowspan="2">น้ำหนักรวม 3 ครั้ง (กก.)</th>
+          <th class="serial-col" rowspan="2">เลขถัง</th>
+          <th class="round-group" colspan="12">รายละเอียดการอัด</th>
+          <th class="total-col" rowspan="2">น้ำหนักรวม</th>
         </tr>
-        <tr id="subHeaderRow"></tr>
+        <tr id="subHeaderRow">
+          <th>ครั้งที่</th><th>วันที่</th><th>ก่อน</th><th>หลัง</th><th>อัดได้</th><th>แรงดัน</th><th>CH4</th><th>CO2</th><th>H2S</th><th>มิเตอร์เริ่ม</th><th>มิเตอร์จบ</th><th>ปริมาณ</th>
+        </tr>
       </thead>
       <tbody id="historyBody"></tbody>
     </table>
   </div>
 </div>
 
-<!-- ===== Modal ยืนยันรหัสผ่าน ===== -->
 <div class="modal-overlay hidden" id="passwordModal">
   <div class="modal">
-    <div class="modal-title" id="modalTitle">🔐 ยืนยันรหัสผ่าน</div>
-    <div class="modal-text" id="modalText">กรุณากรอกรหัสผ่านเพื่อดำเนินการต่อ</div>
-    <input type="password" id="modalPassword" placeholder="กรอกรหัสผ่าน" style="width:100%;" />
+    <div class="modal-title" id="modalTitle">🔐 ยืนยันการลบ</div>
+    <div class="modal-text" id="modalText">กรุณาใส่รหัสผ่านเพื่อดำเนินการ</div>
+    <input type="password" id="modalPassword" placeholder="ใส่รหัสผ่าน..." style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; font-size:15px;" />
     <div class="modal-error" id="modalError"></div>
     <div class="modal-buttons">
       <button class="btn-cancel" id="modalCancel">ยกเลิก</button>
-      <button class="btn-confirm" id="modalConfirm">ยืนยัน</button>
+      <button class="btn-confirm" id="modalConfirm">ยืนยัน ลบ!</button>
     </div>
   </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  console.log("✅ หน้าโหลดเสร็จ");
-
-  // ===== 🔐 รหัสผ่านผู้ดูแลระบบ =====
   const ADMIN_PASSWORD = "1234";
+  const STORAGE_KEY = "GasTankData_v5";
 
-  // ===== ตรวจสอบสภาพแวดล้อม =====
-  if (location.protocol === 'file:') {
-    document.getElementById('secureWarning').style.display = 'block';
-    document.getElementById('successNote').style.display = 'none';
-  } else {
-    document.getElementById('secureWarning').style.display = 'none';
-    document.getElementById('successNote').style.display = 'block';
-  }
-
-  // ===== ข้อมูลตัวอย่างเริ่มต้น =====
-  const SAMPLE_DATA = {
-    "1009": [
-      {d:"2026-08-31", b:"37.8", a:"38.38", w:"0.58", p:"24.83", ch4:"", co2:"", h2s:"", ms:"123400", me:"123450", mm:"50"},
-      {d:"2026-08-31", b:"37.8", a:"38.38", w:"0.58", p:"24.83", ch4:"", co2:"", h2s:"", ms:"123450", me:"123460", mm:"10"},
-      {d:"2026-08-31", b:"37.8", a:"38.38", w:"0.58", p:"24.83", ch4:"", co2:"", h2s:"", ms:"123450", me:"123460", mm:"10"}
-    ],
-    "1085": [
-      {d:"2026-08-31", b:"39.18", a:"39.78", w:"0.60", p:"24.78", ch4:"", co2:"", h2s:"", ms:"", me:"", mm:""},
-      {d:"2026-08-31", b:"39.18", a:"39.78", w:"0.60", p:"24.78", ch4:"", co2:"", h2s:"", ms:"", me:"", mm:""},
-      {d:"2026-08-31", b:"39.18", a:"39.78", w:"0.60", p:"24.78", ch4:"", co2:"", h2s:"", ms:"", me:"", mm:""}
-    ],
-    "1105": [
-      {d:"2026-08-31", b:"37.28", a:"37.84", w:"0.56", p:"24.64", ch4:"", co2:"", h2s:"", ms:"", me:"", mm:""},
-      {d:"2026-08-31", b:"37.28", a:"37.84", w:"0.56", p:"24.64", ch4:"", co2:"", h2s:"", ms:"", me:"", mm:""},
-      {d:"2026-08-31", b:"37.28", a:"37.84", w:"0.56", p:"24.64", ch4:"", co2:"", h2s:"", ms:"", me:"", mm:""}
-    ],
-    "1108": [
-      {d:"2026-08-31", b:"37.18", a:"37.80", w:"0.62", p:"24.86", ch4:"", co2:"", h2s:"", ms:"", me:"", mm:""},
-      {d:"2026-08-31", b:"37.18", a:"37.80", w:"0.62", p:"24.86", ch4:"", co2:"", h2s:"", ms:"", me:"", mm:""},
-      {d:"2026-08-31", b:"37.18", a:"37.80", w:"0.62", p:"24.86", ch4:"", co2:"", h2s:"", ms:"", me:"", mm:""}
-    ]
-  };
-
-  // ===== ฐานข้อมูล =====
   let tankDB = {};
   let currentSerial = "1009";
   let pendingAction = null;
   let scanning = false, videoStream = null;
   const canvas = document.createElement("canvas"), ctx = canvas.getContext("2d");
-  const STORAGE_KEY = "GasTankRegistry_v5";
 
-  // ===== ฟิลด์ย่อยของแต่ละครั้ง =====
-  const SUB_FIELDS = [
-    { key: "round", label: "ครั้งที่", format: (v, i) => i+1 },
-    { key: "d", label: "วันที่", format: v => v || "—" },
-    { key: "b", label: "น้ำหนักก่อนอัด (กก.)", format: v => v || "—" },
-    { key: "a", label: "น้ำหนักหลังอัด (กก.)", format: v => v || "—" },
-    { key: "w", label: "น้ำหนักรวม/KG", format: v => v || "—", weight: true },
-    { key: "p", label: "แรงดันแก๊ส", format: v => v || "—" },
-    { key: "ch4", label: "CH4", format: v => v || "—" },
-    { key: "co2", label: "CO2", format: v => v || "—" },
-    { key: "h2s", label: "H2S", format: v => v || "—" },
-    { key: "ms", label: "Gas Meter Start", format: v => v || "—" },
-    { key: "me", label: "Gas Meter Finish", format: v => v || "—" },
-    { key: "mm", label: "รวม Gas Meter/M3", format: v => v || "—" }
-  ];
+  const SAMPLE_DATA = {
+    "1009": [
+      {d:"2026-08-31", b:"37.80", a:"38.38", w:"0.58", p:"24.83", ch4:"62.5", co2:"35.2", h2s:"12", ms:"123400", me:"123450", mm:"50"},
+      {d:"2026-08-31", b:"38.38", a:"38.96", w:"0.58", p:"24.83", ch4:"63.0", co2:"34.8", h2s:"10", ms:"123450", me:"123460", mm:"10"},
+      {d:"2026-09-01", b:"38.96", a:"39.54", w:"0.58", p:"24.83", ch4:"62.8", co2:"35.0", h2s:"11", ms:"123460", me:"123470", mm:"10"}
+    ],
+    "1085": [],
+    "1105": [],
+    "1108": []
+  };
 
-  // ===== โหลด/บันทึก ข้อมูล =====
   function loadData() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        tankDB = JSON.parse(saved);
-      } else {
-        tankDB = JSON.parse(JSON.stringify(SAMPLE_DATA));
-        saveData();
-      }
+      tankDB = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(SAMPLE_DATA));
     } catch (e) {
       tankDB = JSON.parse(JSON.stringify(SAMPLE_DATA));
     }
@@ -381,29 +313,25 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function saveData() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(tankDB));
-      updateTankCount();
-    } catch (e) {}
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tankDB));
+    updateTankCount();
   }
 
   function updateTankCount() {
     document.getElementById("tankCount").textContent = Object.keys(tankDB).length;
   }
 
-  // ===== แสดงข้อมูลถัง =====
   function renderTank(serial) {
-    if (!tankDB[serial]) {
-      tankDB[serial] = [];
-      saveData();
-    }
+    if (!serial) return;
+    currentSerial = serial;
+    if (!tankDB[serial]) tankDB[serial] = [];
 
-    const recs = tankDB[serial] || [];
+    const recs = tankDB[serial];
     document.getElementById("tankSerial").textContent = "#" + serial;
-    const totalW = recs.reduce((s,r) => s + (Number(r.w)||0), 0).toFixed(2);
-    document.getElementById("tankStats").textContent = `ประวัติการอัด ${recs.length} ครั้ง · น้ำหนักแก๊สอัดรวม ${totalW} กก.`;
-
+    const totalW = recs.reduce((s,r) => s + (parseFloat(r.w)||0), 0).toFixed(2);
+    document.getElementById("tankStats").textContent = `อัด ${recs.length} ครั้ง · รวม ${totalW} กก.`;
     document.getElementById("fRound").value = recs.length + 1;
+    document.getElementById("serialInput").value = serial;
 
     if (recs.length === 0) {
       document.getElementById("emptyNote").style.display = "block";
@@ -411,187 +339,119 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
       document.getElementById("emptyNote").style.display = "none";
       document.getElementById("historySection").style.display = "block";
-      renderHistoryTable();
+      renderHistoryTable(serial);
     }
   }
 
-  // ===== ฟังก์ชันแสดงตาราง =====
-  function renderHistoryTable() {
-    const subHeaderRow = document.getElementById("subHeaderRow");
+  function renderHistoryTable(serial) {
+    const recs = tankDB[serial] || [];
     const tbody = document.getElementById("historyBody");
-    
-    subHeaderRow.innerHTML = "";
     tbody.innerHTML = "";
 
-    // สร้างหัวย่อย
-    for (let round = 1; round <= 3; round++) {
-      SUB_FIELDS.forEach(field => {
-        const th = document.createElement("th");
-        th.textContent = field.label;
-        subHeaderRow.appendChild(th);
-      });
-    }
-
-    // สร้างแถวข้อมูล
-    const serials = Object.keys(tankDB).sort((a,b) => Number(a) - Number(b));
-
-    serials.forEach(serial => {
-      const recs = tankDB[serial] || [];
+    recs.forEach((r, idx) => {
       const tr = document.createElement("tr");
-
-      // คอลัมน์แรก: เลขถัง
-      const tdSerial = document.createElement("td");
-      tdSerial.className = "serial-cell";
-      tdSerial.textContent = serial;
-      tr.appendChild(tdSerial);
-
-      // คอลัมน์ครั้งที่ 1-3
-      let totalWeight = 0;
-      for (let round = 0; round < 3; round++) {
-        const r = recs[round];
-        if (r) {
-          totalWeight += Number(r.w) || 0;
-          SUB_FIELDS.forEach((field, idx) => {
-            const td = document.createElement("td");
-            td.textContent = field.format(r[field.key], round);
-            if (field.weight) td.classList.add("weight-cell");
-            tr.appendChild(td);
-          });
-        } else {
-          for (let i = 0; i < 12; i++) {
-            const td = document.createElement("td");
-            td.textContent = "—";
-            td.style.color = "#bbb";
-            tr.appendChild(td);
-          }
-        }
-      }
-
-      // คอลัมน์สุดท้าย: น้ำหนักรวม
-      const tdTotal = document.createElement("td");
-      tdTotal.className = "total-cell";
-      tdTotal.textContent = totalWeight.toFixed(2);
-      tr.appendChild(tdTotal);
-
+      tr.innerHTML = `
+        <td class="serial-cell">${serial}</td>
+        <td>${idx+1}</td>
+        <td>${r.d}</td>
+        <td>${r.b}</td>
+        <td>${r.a}</td>
+        <td class="weight-cell">${r.w}</td>
+        <td>${r.p}</td>
+        <td>${r.ch4 || "—"}</td>
+        <td>${r.co2 || "—"}</td>
+        <td>${r.h2s || "—"}</td>
+        <td>${r.ms || "—"}</td>
+        <td>${r.me || "—"}</td>
+        <td>${r.mm || "—"}</td>
+      `;
       tbody.appendChild(tr);
     });
   }
 
-  // ===== แสดงรายการถังทั้งหมด =====
-  function renderAllTanks() {
-    const container = document.getElementById("tankList");
-    container.innerHTML = "";
-    const serials = Object.keys(tankDB).sort((a,b) => Number(a) - Number(b));
-    
-    if (serials.length === 0) {
-      container.innerHTML = '<div style="text-align:center; color:#666; padding:20px;">ยังไม่มีข้อมูลถังแก๊ส</div>';
-      return;
-    }
-
-    serials.forEach(serial => {
-      const recs = tankDB[serial] || [];
-      const totalW = recs.reduce((s,r) => s + (Number(r.w)||0), 0).toFixed(2);
-      const hasData = recs.length > 0;
-      
-      const item = document.createElement("div");
-      item.className = "tank-item";
-      item.innerHTML = `
-        <div class="tank-item-left" style="display:flex; align-items:center; gap:10px;">
-          <span class="tank-item-status ${hasData ? 'status-active' : 'status-empty'}">${hasData ? 'มีประวัติ' : 'ยังว่าง'}</span>
-          <div>
-            <div class="tank-item-serial">#${serial}</div>
-            <div class="tank-item-info">${recs.length} ครั้ง · รวม ${totalW} กก.</div>
-          </div>
-        </div>
-        <div style="color:#2B5F75; font-size:13px;">เปิด ›</div>
-      `;
-      item.addEventListener("click", () => {
-        currentSerial = serial;
-        document.getElementById("serialInput").value = serial;
-        renderTank(serial);
-        document.getElementById("tankListContainer").classList.add("hidden");
-        window.scrollTo({top: 0, behavior: 'smooth'});
-      });
-      container.appendChild(item);
-    });
-  }
-
-  // ===== 🔐 ระบบยืนยันรหัสผ่าน =====
-  function showPasswordModal(title, text, onConfirm) {
-    pendingAction = onConfirm;
+  function showPasswordModal(title, text, onSuccess) {
     document.getElementById("modalTitle").textContent = title;
     document.getElementById("modalText").textContent = text;
     document.getElementById("modalPassword").value = "";
     document.getElementById("modalError").textContent = "";
     document.getElementById("passwordModal").classList.remove("hidden");
-    document.getElementById("modalPassword").focus();
+    pendingAction = onSuccess;
   }
 
-  function closePasswordModal() {
+  function hidePasswordModal() {
     document.getElementById("passwordModal").classList.add("hidden");
     pendingAction = null;
   }
 
-  document.getElementById("modalCancel").addEventListener("click", closePasswordModal);
-  
-  document.getElementById("modalConfirm").addEventListener("click", () => {
-    const pwd = document.getElementById("modalPassword").value;
-    if (pwd === ADMIN_PASSWORD) {
-      closePasswordModal();
+  document.getElementById("modalCancel").onclick = hidePasswordModal;
+  document.getElementById("modalConfirm").onclick = function() {
+    const input = document.getElementById("modalPassword").value;
+    if (input === ADMIN_PASSWORD) {
+      hidePasswordModal();
       if (pendingAction) pendingAction();
     } else {
-      document.getElementById("modalError").textContent = "❌ รหัสผ่านไม่ถูกต้อง";
-      document.getElementById("modalPassword").value = "";
-      document.getElementById("modalPassword").focus();
+      document.getElementById("modalError").textContent = "❌ รหัสผ่านไม่ถูกต้อง!";
     }
-  });
-
-  document.getElementById("modalPassword").addEventListener("keydown", (e) => {
+  };
+  document.getElementById("modalPassword").addEventListener("keydown", e => {
     if (e.key === "Enter") document.getElementById("modalConfirm").click();
   });
 
-  // ===== เปิด/ปิด ฟอร์ม =====
-  document.getElementById("toggleForm").addEventListener("click", () => {
-    document.getElementById("formContainer").classList.toggle("hidden");
-  });
+  document.getElementById("btnClearHistory").onclick = function() {
+    showPasswordModal(
+      "🗑️ ลบประวัติถังนี้",
+      `ยืนยันลบประวัติทั้งหมดของถัง #${currentSerial}?\n⚠️ ข้อมูลจะหายไปและกู้คืนไม่ได้!`,
+      () => {
+        tankDB[currentSerial] = [];
+        saveData();
+        renderTank(currentSerial);
+        alert(`✅ ลบประวัติถัง #${currentSerial} เรียบร้อย`);
+      }
+    );
+  };
 
-  // ===== บันทึกข้อมูล =====
-  document.getElementById("btnSave").addEventListener("click", () => {
-    const b = parseFloat(document.getElementById("fBefore").value);
-    const a = parseFloat(document.getElementById("fAfter").value);
-    const d = document.getElementById("fDate").value;
+  document.getElementById("btnDeleteAll").onclick = function() {
+    showPasswordModal(
+      "⚠️ ลบข้อมูลทั้งหมด",
+      `ยืนยันลบประวัติทุกถัง?\n⚠️ การกระทำนี้ไม่สามารถยกเลิกได้!`,
+      () => {
+        Object.keys(tankDB).forEach(s => { tankDB[s] = []; });
+        saveData();
+        renderTank(currentSerial);
+        alert("✅ ลบข้อมูลทั้งหมดเรียบร้อย");
+      }
+    );
+  };
 
-    if (!d || isNaN(b) || isNaN(a)) {
-      return alert("⚠️ กรุณากรอกวันที่, น้ำหนักก่อนและหลังอัดให้ครบถ้วน");
+  document.getElementById("toggleForm").onclick = () => {
+    const form = document.getElementById("formContainer");
+    form.classList.toggle("hidden");
+    if (!form.classList.contains("hidden")) {
+      document.getElementById("fDate").valueAsDate = new Date();
     }
+  };
 
-    const w = (a - b).toFixed(2);
+  document.getElementById("btnSave").onclick = function() {
+    const d = document.getElementById("fDate").value;
+    const b = document.getElementById("fBefore").value;
+    const a = document.getElementById("fAfter").value;
+    const p = document.getElementById("fPress").value;
+    const ch4 = document.getElementById("fCH4").value;
+    const co2 = document.getElementById("fCO2").value;
+    const h2s = document.getElementById("fH2S").value;
     const ms = document.getElementById("fMStart").value;
     const me = document.getElementById("fMEnd").value;
-    let mm = "—";
-    if (ms && me && !isNaN(Number(ms)) && !isNaN(Number(me))) {
-      mm = (Number(me) - Number(ms)).toString();
-    }
 
-    const rec = {
-      d: d,
-      b: b.toFixed(2),
-      a: a.toFixed(2),
-      w: w,
-      p: document.getElementById("fPress").value || "—",
-      ch4: document.getElementById("fCH4").value || "—",
-      co2: document.getElementById("fCO2").value || "—",
-      h2s: document.getElementById("fH2S").value || "—",
-      ms: ms || "—",
-      me: me || "—",
-      mm: mm
-    };
+    if (!d || !b || !a) return alert("⚠️ กรุณาใส่วันที่, น้ำหนักก่อนและหลังอัด");
 
-    tankDB[currentSerial].push(rec);
+    const w = (parseFloat(a) - parseFloat(b)).toFixed(2);
+    const mm = (ms && me) ? (parseFloat(me) - parseFloat(ms)).toFixed(2) : "";
+
+    tankDB[currentSerial].push({d, b, a, w, p, ch4, co2, h2s, ms, me, mm});
     saveData();
+    renderTank(currentSerial);
 
-    alert(`✅ บันทึกสำเร็จ!\nถัง #${currentSerial}\nครั้งที่: ${tankDB[currentSerial].length}\nน้ำหนักอัด: ${w} กก.`);
-
+    document.getElementById("formContainer").classList.add("hidden");
     document.getElementById("fBefore").value = "";
     document.getElementById("fAfter").value = "";
     document.getElementById("fPress").value = "";
@@ -600,218 +460,139 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById("fH2S").value = "";
     document.getElementById("fMStart").value = "";
     document.getElementById("fMEnd").value = "";
-    document.getElementById("formContainer").classList.add("hidden");
 
-    renderTank(currentSerial);
-  });
+    alert(`✅ บันทึกครั้งที่ ${tankDB[currentSerial].length} สำเร็จ\nน้ำหนักอัดได้: ${w} กก.`);
+  };
 
-  // ===== 🗑️ ลบประวัติเฉพาะถังนี้ =====
-document.getElementById("btnClearHistory").addEventListener("click", () => {
-  showPasswordModal(
-    "🗑️ ลบประวัติถังนี้",
-    `คุณต้องการลบประวัติการอัดทั้งหมดของถัง #${currentSerial} ใช่หรือไม่?\n\n⚠️ ข้อมูลจะหายไปและไม่สามารถกู้คืนได้!`,
-    () => {
-      // ✅ ลบข้อมูล
-      tankDB[currentSerial] = [];
-      saveData();
-      
-      // ✅ รีเฟรชข้อมูลทันที
-      renderTank(currentSerial);
-      
-      alert(`✅ ลบประวัติถัง #${currentSerial} เรียบร้อยแล้ว`);
+  document.getElementById("btnSearch").onclick = function() {
+    let s = document.getElementById("serialInput").value.trim();
+    if (!s) return alert("⚠️ ใส่เลขถังก่อนค้นหา");
+    if (!tankDB[s]) {
+      if (confirm(`ไม่พบถัง #${s} ต้องการเพิ่มใหม่?`)) {
+        tankDB[s] = [];
+        saveData();
+      } else return;
     }
-  );
-});
-
-  // ===== 🗑️ ลบข้อมูลทั้งหมด =====
-document.getElementById("btnDeleteAll").addEventListener("click", () => {
-  showPasswordModal(
-    "⚠️ ลบข้อมูลทั้งหมด",
-    `คุณแน่ใจหรือไม่? จะลบประวัติการอัดทุกถัง!\n\n⚠️ การกระทำนี้ไม่สามารถยกเลิกได้!`,
-    () => {
-      // ✅ ลบประวัติทุกถัง แต่เก็บรายการเลขถังไว้
-      Object.keys(tankDB).forEach(serial => {
-        tankDB[serial] = [];
-      });
-      saveData();
-      
-      // ✅ รีเฟรชหน้าจอทันที
-      renderTank(currentSerial);
-      
-      alert("✅ ลบข้อมูลทั้งหมดเรียบร้อยแล้ว");
-    }
-  );
-});
-
-  // ===== ค้นหาถัง =====
-  document.getElementById("btnSearch").addEventListener("click", () => {
-    const s = document.getElementById("serialInput").value.trim();
-    if (!s) return alert("⚠️ กรุณาป้อนเลขถัง");
-    currentSerial = s;
     renderTank(s);
     document.getElementById("tankListContainer").classList.add("hidden");
-  });
+  };
 
-  // ===== ดูรายการถังทั้งหมด =====
-  document.getElementById("btnAllTanks").addEventListener("click", () => {
-    renderAllTanks();
-    document.getElementById("tankListContainer").classList.toggle("hidden");
-  });
-  document.getElementById("btnCloseTankList").addEventListener("click", () => {
-    document.getElementById("tankListContainer").classList.add("hidden");
-  });
-
-  // ============================================================
-  // 📥 🆕 ฟังก์ชันดาวน์โหลด Excel 3 แบบ
-  // ============================================================
-
-  // 📋 1. ดาวโหลดรหัสถังทั้งหมด (ไม่ซ้ำ)
-  document.getElementById("btnExportTanks").addEventListener("click", () => {
-    if (typeof XLSX === 'undefined') return alert("⚠️ รอไลบรารีโหลดเสร็จก่อน");
-    
-    const serials = Object.keys(tankDB).sort((a,b) => Number(a) - Number(b));
-    const rows = serials.map(serial => {
-      const recs = tankDB[serial] || [];
-      const totalW = recs.reduce((s,r) => s + (Number(r.w)||0), 0).toFixed(2);
-      const lastDate = recs.length > 0 ? recs[recs.length-1].d : "—";
-      return {
-        "ลำดับที่": serials.indexOf(serial) + 1,
-        "เลขถังแก๊ส": serial,
-        "จำนวนครั้งที่อัด": recs.length,
-        "วันที่อัดล่าสุด": lastDate,
-        "น้ำหนักรวมทั้งหมด(กก.)": totalW,
-        "สถานะ": recs.length > 0 ? "มีประวัติ" : "ยังไม่มีประวัติ"
-      };
-    });
-
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "รหัสถังทั้งหมด");
-    const now = new Date();
-    const stamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-    XLSX.writeFile(wb, `รหัสถังแก๊สทั้งหมด_${stamp}.xlsx`);
-    alert("✅ ดาวน์โหลด: รหัสถังทั้งหมด เรียบร้อย!");
-  });
-
-  // 📅 2. ดาวโหลดประวัติการอัดแก๊สรายวัน (เรียงตามวันที่)
-  document.getElementById("btnExportDaily").addEventListener("click", () => {
-    if (typeof XLSX === 'undefined') return alert("⚠️ รอไลบรารีโหลดเสร็จก่อน");
-    
-    const allRecords = [];
-    Object.entries(tankDB).forEach(([serial, recs]) => {
-      recs.forEach((r, i) => {
-        allRecords.push({
-          "เลขถังแก๊ส": serial,
-          "ครั้งที่": i + 1,
-          "วันที่": r.d,
-          "น้ำหนักก่อนอัด(กก.)": r.b,
-          "น้ำหนักหลังอัด(กก.)": r.a,
-          "น้ำหนักอัด(กก.)": r.w,
-          "แรงดันแก๊ส": r.p,
-          "CH4(%)": r.ch4,
-          "CO2(%)": r.co2,
-          "H2S(ppm)": r.h2s,
-          "Gas Meter Start": r.ms,
-          "Gas Meter Finish": r.me,
-          "รวม Gas Meter/M3": r.mm
-        });
-      });
-    });
-
-    // เรียงตามวันที่ จากเก่าไปใหม่
-    allRecords.sort((a, b) => a["วันที่"].localeCompare(b["วันที่"]));
-
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(allRecords), "ประวัติการอัดรายวัน");
-    const now = new Date();
-    const stamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-    XLSX.writeFile(wb, `ประวัติการอัดแก๊สรายวัน_${stamp}.xlsx`);
-    alert("✅ ดาวน์โหลด: ประวัติการอัดแก๊สรายวัน เรียบร้อย!");
-  });
-
-  // 📊 3. ดาวโหลดประวัติการอัดแก๊สทั้งหมด (แบบเต็ม เรียงตามเลขถัง)
-  document.getElementById("btnExportAll").addEventListener("click", () => {
-    if (typeof XLSX === 'undefined') return alert("⚠️ รอไลบรารีโหลดเสร็จก่อน");
-    
-    const rows = [];
-    Object.entries(tankDB).forEach(([serial, recs]) => {
-      recs.forEach((r, i) => {
-        rows.push({
-          "เลขถังแก๊ส": serial,
-          "ครั้งที่": i + 1,
-          "วันที่": r.d,
-          "น้ำหนักก่อนอัด(กก.)": r.b,
-          "น้ำหนักหลังอัด(กก.)": r.a,
-          "น้ำหนักอัด(กก.)": r.w,
-          "แรงดันแก๊ส": r.p,
-          "CH4(%)": r.ch4,
-          "CO2(%)": r.co2,
-          "H2S(ppm)": r.h2s,
-          "Gas Meter Start": r.ms,
-          "Gas Meter Finish": r.me,
-          "รวม Gas Meter/M3": r.mm
-        });
-      });
-    });
-
-    // เรียงตามเลขถัง แล้วตามครั้งที่
-    rows.sort((a, b) => {
-      const serialDiff = Number(a["เลขถังแก๊ส"]) - Number(b["เลขถังแก๊ส"]);
-      if (serialDiff !== 0) return serialDiff;
-      return a["ครั้งที่"] - b["ครั้งที่"];
-    });
-
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "ประวัติการอัดทั้งหมด");
-    const now = new Date();
-    const stamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-    XLSX.writeFile(wb, `ประวัติการอัดแก๊สทั้งหมด_${stamp}.xlsx`);
-    alert("✅ ดาวน์โหลด: ประวัติการอัดแก๊สทั้งหมด เรียบร้อย!");
-  });
-
-  // ===== เปิดกล้องสแกน QR =====
-  document.getElementById("btnScan").addEventListener("click", async () => {
-    if (location.protocol === 'file:') {
-      alert("❌ เปิดผ่านไฟล์ในเครื่องไม่สามารถเปิดกล้องได้\n\n✅ อัปโหลดไฟล์ขึ้น OneDrive/Google Drive แล้วเปิดผ่านลิงก์ https://\n\n💡 หรือพิมพ์เลขถังเองแทนได้เลยครับ");
-      return;
+  document.getElementById("btnAllTanks").onclick = function() {
+    const container = document.getElementById("tankListContainer");
+    container.classList.toggle("hidden");
+    if (!container.classList.contains("hidden")) {
+      renderTankList();
     }
+  };
+  document.getElementById("btnCloseTankList").onclick = () => {
+    document.getElementById("tankListContainer").classList.add("hidden");
+  };
+
+  function renderTankList() {
+    const list = document.getElementById("tankList");
+    list.innerHTML = "";
+    Object.keys(tankDB).sort((a,b) => parseInt(a)-parseInt(b)).forEach(s => {
+      const recs = tankDB[s];
+      const totalW = recs.reduce((x,r) => x + (parseFloat(r.w)||0), 0).toFixed(2);
+      const item = document.createElement("div");
+      item.className = "tank-item";
+      item.innerHTML = `
+        <div class="tank-item-left">
+          <span class="tank-item-status ${recs.length>0?'status-active':'status-empty'}">${recs.length>0?'มีข้อมูล':'ว่าง'}</span>
+          <span class="tank-item-serial">#${s}</span>
+          <div class="tank-item-info">อัด ${recs.length} ครั้ง · รวม ${totalW} กก.</div>
+        </div>
+        <span>▶</span>
+      `;
+      item.onclick = () => {
+        renderTank(s);
+        document.getElementById("tankListContainer").classList.add("hidden");
+      };
+      list.appendChild(item);
+    });
+  }
+
+  function exportFile(rows, sheetName, fileNamePrefix) {
+    if (typeof XLSX === 'undefined') return alert("⚠️ รอโหลดไลบรารี Excel ก่อนนะครับ");
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), sheetName);
+    const d = new Date();
+    const stamp = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    XLSX.writeFile(wb, `${fileNamePrefix}_${stamp}.xlsx`);
+  }
+
+  document.getElementById("btnExportTanks").onclick = function() {
+    const serials = Object.keys(tankDB).sort((a,b) => parseInt(a)-parseInt(b));
+    exportFile(serials.map((s,i) => {
+      const recs = tankDB[s];
+      const totalW = recs.reduce((x,r) => x + (parseFloat(r.w)||0), 0).toFixed(2);
+      const last = recs.length? recs[recs.length-1].d : "—";
+      return {
+        "ลำดับ": i+1, "เลขถัง": s, "จำนวนครั้ง": recs.length,
+        "วันที่ล่าสุด": last, "น้ำหนักรวม(กก.)": totalW,
+        "สถานะ": recs.length? "มีประวัติ" : "ว่าง"
+      };
+    }), "รหัสถังทั้งหมด", "รหัสถังทั้งหมด");
+    alert("✅ ดาวน์โหลดสำเร็จ");
+  };
+
+  document.getElementById("btnExportDaily").onclick = function() {
+    let all = [];
+    Object.entries(tankDB).forEach(([s,recs]) => {
+      recs.forEach((r,i) => all.push({
+        "เลขถัง": s, "ครั้งที่": i+1, "วันที่": r.d,
+        "ก่อนอัด": r.b, "หลังอัด": r.a, "อัดได้": r.w,
+        "แรงดัน": r.p, "CH4": r.ch4, "CO2": r.co2, "H2S": r.h2s,
+        "มิเตอร์เริ่ม": r.ms, "มิเตอร์จบ": r.me, "ปริมาณ": r.mm
+      }));
+    });
+    all.sort((a,b) => a["วันที่"].localeCompare(b["วันที่"]));
+    exportFile(all, "ตามวันที่", "ประวัติรายวัน");
+    alert("✅ ดาวน์โหลดสำเร็จ");
+  };
+
+  document.getElementById("btnExportAll").onclick = function() {
+    let all = [];
+    Object.entries(tankDB).sort((a,b) => parseInt(a[0])-parseInt(b[0])).forEach(([s,recs]) => {
+      recs.forEach((r,i) => all.push({
+        "เลขถัง": s, "ครั้งที่": i+1, "วันที่": r.d,
+        "ก่อนอัด": r.b, "หลังอัด": r.a, "อัดได้": r.w,
+        "แรงดัน": r.p, "CH4": r.ch4, "CO2": r.co2, "H2S": r.h2s,
+        "มิเตอร์เริ่ม": r.ms, "มิเตอร์จบ": r.me, "ปริมาณ": r.mm
+      }));
+    });
+    exportFile(all, "ทั้งหมด", "ประวัติทั้งหมด");
+    alert("✅ ดาวน์โหลดสำเร็จ");
+  };
+
+  document.getElementById("btnScan").onclick = async function() {
+    if (location.protocol === "file:") return alert("⚠️ เปิดผ่านไฟล์เครื่องไม่สามารถใช้กล้องได้ครับ");
     try {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        alert("❌ เบราว์เซอร์นี้ไม่รองรับการเข้าถึงกล้อง");
-        return;
-      }
+      videoStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});
       const video = document.getElementById("video");
-      document.getElementById("scanWrap").classList.remove("hidden");
-      videoStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: "environment" } 
-      });
       video.srcObject = videoStream;
       await video.play();
+      document.getElementById("scanWrap").classList.remove("hidden");
       scanning = true;
       scanLoop();
-    } catch (e) {
-      alert("❌ เปิดกล้องล้มเหลว: " + e.message);
-      console.error(e);
-    }
-  });
+    } catch(e) { alert("❌ เปิดกล้องไม่ได้: " + e.message); }
+  };
 
   function scanLoop() {
     if (!scanning) return;
-    const v = document.getElementById("video");
-    if (v.videoWidth === 0) return requestAnimationFrame(scanLoop);
-    canvas.width = v.videoWidth; canvas.height = v.videoHeight;
-    ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
-    if (typeof jsQR !== 'undefined') {
-      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const code = jsQR(imgData.data, imgData.width, imgData.height);
+    const video = document.getElementById("video");
+    if (video.videoWidth) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video,0,0);
+      const img = ctx.getImageData(0,0,canvas.width,canvas.height);
+      const code = jsQR(img.data,img.width,img.height);
       if (code && code.data) {
         stopScan();
-        const serial = code.data.trim().replace(/[^0-9]/g, "");
-        document.getElementById("serialInput").value = serial;
-        if (serial) {
-          currentSerial = serial;
-          renderTank(serial);
-          alert(`✅ พบถัง #${serial}`);
-        }
+        const s = code.data.replace(/\D/g,"");
+        document.getElementById("serialInput").value = s;
+        document.getElementById("btnSearch").click();
+        return alert("✅ พบ: " + s);
       }
     }
     requestAnimationFrame(scanLoop);
@@ -819,42 +600,38 @@ document.getElementById("btnDeleteAll").addEventListener("click", () => {
 
   function stopScan() {
     scanning = false;
-    if (videoStream) {
-      videoStream.getTracks().forEach(t => t.stop());
-      videoStream = null;
-    }
+    if (videoStream) videoStream.getTracks().forEach(t=>t.stop());
     document.getElementById("scanWrap").classList.add("hidden");
   }
 
-  // ===== อัปโหลดรูป QR =====
-  document.getElementById("btnUpload").addEventListener("click", () => document.getElementById("fileQr").click());
-  document.getElementById("fileQr").addEventListener("change", e => {
+  document.getElementById("btnUpload").onclick = () => document.getElementById("fileQr").click();
+  document.getElementById("fileQr").onchange = e => {
     const f = e.target.files[0]; if (!f) return;
     const img = new Image();
     img.onload = () => {
       canvas.width = img.width; canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
-      if (typeof jsQR === 'undefined') return alert("⚠️ ไลบรารียังโหลดไม่เสร็จ");
-      const d = ctx.getImageData(0, 0, img.width, img.height);
-      const code = jsQR(d.data, img.width, img.height);
+      ctx.drawImage(img,0,0);
+      const d = ctx.getImageData(0,0,img.width,img.height);
+      const code = jsQR(d.data,d.width,d.height);
       if (code && code.data) {
-        const serial = code.data.trim().replace(/[^0-9]/g, "");
-        document.getElementById("serialInput").value = serial;
-        if (serial) {
-          currentSerial = serial;
-          renderTank(serial);
-          alert(`✅ อ่านจากรูป: ถัง #${serial}`);
-        }
-      } else alert("❌ อ่าน QR จากรูปไม่ได้");
+        const s = code.data.replace(/\D/g,"");
+        document.getElementById("serialInput").value = s;
+        document.getElementById("btnSearch").click();
+        alert("✅ พบ: " + s);
+      } else alert("❌ อ่าน QR ไม่ได้");
     };
     img.src = URL.createObjectURL(f);
     e.target.value = "";
-  });
+  };
 
-  // ===== เริ่มต้นระบบ =====
   loadData();
-  document.getElementById("fDate").valueAsDate = new Date();
-  renderTank("1009");
+  if (location.protocol === "file:") {
+    document.getElementById("secureWarning").style.display = "block";
+  } else {
+    document.getElementById("secureWarning").style.display = "none";
+    document.getElementById("successNote").classList.remove("hidden");
+  }
+  renderTank(currentSerial);
 });
 </script>
 </body>
