@@ -606,34 +606,42 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // ===== 🗑️ ลบประวัติเฉพาะถังนี้ =====
-  document.getElementById("btnClearHistory").addEventListener("click", () => {
-    showPasswordModal(
-      "🗑️ ลบประวัติถังนี้",
-      `คุณต้องการลบประวัติการอัดทั้งหมดของถัง #${currentSerial} ใช่หรือไม่?\n\nต้องใช้รหัสผ่านผู้ดูแลระบบ`,
-      () => {
-        tankDB[currentSerial] = [];
-        saveData();
-        renderTank(currentSerial);
-        alert(`✅ ลบประวัติถัง #${currentSerial} เรียบร้อยแล้ว`);
-      }
-    );
-  });
+document.getElementById("btnClearHistory").addEventListener("click", () => {
+  showPasswordModal(
+    "🗑️ ลบประวัติถังนี้",
+    `คุณต้องการลบประวัติการอัดทั้งหมดของถัง #${currentSerial} ใช่หรือไม่?\n\n⚠️ ข้อมูลจะหายไปและไม่สามารถกู้คืนได้!`,
+    () => {
+      // ✅ ลบข้อมูล
+      tankDB[currentSerial] = [];
+      saveData();
+      
+      // ✅ รีเฟรชข้อมูลทันที
+      renderTank(currentSerial);
+      
+      alert(`✅ ลบประวัติถัง #${currentSerial} เรียบร้อยแล้ว`);
+    }
+  );
+});
 
   // ===== 🗑️ ลบข้อมูลทั้งหมด =====
-  document.getElementById("btnDeleteAll").addEventListener("click", () => {
-    showPasswordModal(
-      "⚠️ ลบข้อมูลทั้งหมด",
-      `คุณต้องการลบข้อมูลการอัดทุกถังทั้งหมดใช่หรือไม่?\n\nจะลบประวัติทุกถัง แต่ยังคงรายการเลขถังไว้\n\nต้องใช้รหัสผ่านผู้ดูแลระบบ!`,
-      () => {
-        Object.keys(tankDB).forEach(serial => {
-          tankDB[serial] = [];
-        });
-        saveData();
-        renderTank(currentSerial);
-        alert("✅ ลบข้อมูลการอัดทั้งหมดเรียบร้อยแล้ว");
-      }
-    );
-  });
+document.getElementById("btnDeleteAll").addEventListener("click", () => {
+  showPasswordModal(
+    "⚠️ ลบข้อมูลทั้งหมด",
+    `คุณแน่ใจหรือไม่? จะลบประวัติการอัดทุกถัง!\n\n⚠️ การกระทำนี้ไม่สามารถยกเลิกได้!`,
+    () => {
+      // ✅ ลบประวัติทุกถัง แต่เก็บรายการเลขถังไว้
+      Object.keys(tankDB).forEach(serial => {
+        tankDB[serial] = [];
+      });
+      saveData();
+      
+      // ✅ รีเฟรชหน้าจอทันที
+      renderTank(currentSerial);
+      
+      alert("✅ ลบข้อมูลทั้งหมดเรียบร้อยแล้ว");
+    }
+  );
+});
 
   // ===== ค้นหาถัง =====
   document.getElementById("btnSearch").addEventListener("click", () => {
