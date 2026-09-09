@@ -3,220 +3,150 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ทะเบียนถังแก๊ส</title>
+  <title>ทะเบียนถังแก๊ส — OneDrive</title>
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     * { box-sizing: border-box; font-family: "Segoe UI", sans-serif; margin: 0; padding: 0; }
-    body { background: #f5f5f0; padding: 16px; max-width: 100%; margin: 0 auto; color: #333; overflow-x: auto; }
+    body { background: #f5f5f0; padding: 16px; max-width: 100%; margin: 0 auto; color: #333; }
+
+    .sync-bar { background: #e6fffa; padding: 10px 14px; border-radius: 8px; margin-bottom: 14px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .sync-status { font-weight: 500; }
+    .sync-btn { padding: 6px 14px; background: #0d9488; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; }
+    .sync-btn:hover { background: #0f766e; }
 
     .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 14px; font-size: 14px; line-height: 1.5; }
-    .alert-error { background: #fef2f2; border-left: 4px solid #ef4444; color: #b91c1c; }
-    .alert-success { background: #f0fdf4; border-left: 4px solid #22c55e; color: #166534; }
+    .alert-info { background: #e6f7ff; border-left: 4px solid #1890ff; color: #0050b3; }
 
-    .tank-header { background: #2B5F75; color: white; padding: 16px; border-radius: 10px 10px 0 0; }
+    .tank-header { background: #2B5F75; color: white; padding: 16px; border-radius: 10px; margin-bottom: 14px; }
     .tank-serial { font-size: 22px; font-weight: bold; margin-bottom: 4px; }
     .tank-stats { font-size: 14px; opacity: 0.9; }
-
-    .empty-note { background: #f9f6f0; padding: 18px; text-align: center; color: #666; font-size: 15px; }
 
     .btn-add { width: 100%; background: #d4edda; color: #155724; border: none; padding: 14px; font-size: 16px; border-radius: 8px; cursor: pointer; margin: 12px 0; font-weight: 500; }
     .btn-add:hover { background: #c3e6cb; }
 
-    .form-container { background: #f9f6f0; padding: 20px; border-radius: 0 0 10px 10px; max-width: 700px; margin: 0 auto; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
-    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .form-container { background: #f9f6f0; padding: 20px; border-radius: 10px; max-width: 760px; margin: 0 auto; }
+    .form-title { font-size: 15px; font-weight: 600; margin: 12px 0 8px 0; color: #2B5F75; border-bottom: 2px solid #2B5F75; padding-bottom: 4px; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 12px; }
     .form-group { display: flex; flex-direction: column; }
-    label { font-size: 13px; color: #555; margin-bottom: 5px; }
-    input { padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 15px; background: #fff; }
+    label { font-size: 12px; color: #555; margin-bottom: 4px; }
+    input { padding: 8px 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; background: #fff; }
     input:focus { outline: none; border-color: #2B5F75; box-shadow: 0 0 0 2px rgba(43,95,117,0.15); }
+    input[readonly] { background: #f0f4f8; color: #1C4353; font-weight: 500; }
+    .calc { font-size: 11px; color: #0d9488; margin-top: 2px; }
 
-    .btn-submit { width: 100%; background: #2B5F75; color: white; border: none; padding: 14px; font-size: 17px; border-radius: 8px; cursor: pointer; margin-top: 8px; font-weight: 500; }
+    .btn-submit { width: 100%; background: #2B5F75; color: white; border: none; padding: 14px; font-size: 17px; border-radius: 8px; cursor: pointer; margin-top: 12px; font-weight: 500; }
     .btn-submit:hover { background: #1C4353; }
-    .btn-danger { background: #dc2626; color: white; border: none; padding: 10px 14px; font-size: 14px; border-radius: 8px; cursor: pointer; }
-    .btn-danger:hover { background: #b91c1c; }
-    .btn-danger-small { background: #dc2626; color: white; border: none; padding: 4px 10px; font-size: 12px; border-radius: 6px; cursor: pointer; }
-    .btn-danger-small:hover { background: #b91c1c; }
 
-    .top-controls { margin-bottom: 16px; max-width: 700px; margin-left: auto; margin-right: auto; }
+    .top-controls { margin-bottom: 16px; max-width: 760px; margin-left: auto; margin-right: auto; }
     .btn-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
     .btn { padding: 10px 14px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; }
     .btn-primary { background: #2B5F75; color: white; }
     .btn-primary:hover { background: #1C4353; }
     .btn-ghost { background: white; color: #2B5F75; border: 1px solid #2B5F75; }
-    .btn-ghost:hover { background: #f0f4f8; }
+    .btn-ghost:hover, .btn.active { background: #e6fffa; border-color: #0d9488; color: #0f766e; }
     .search-row { display: flex; gap: 8px; margin-top: 10px; }
     .search-row input { flex: 1; }
-    .action-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 
+    .table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid #1C4353; background: white; margin-top: 14px; }
+    table { width: 100%; border-collapse: collapse; font-size: 11px; min-width: 2400px; }
+    table.small { min-width: 800px; }
+    th { background: #2B5F75; color: white; padding: 7px 4px; text-align: center; border: 1px solid #1C4353; white-space: nowrap; font-weight: 500; }
+    .th-group { background: #1C4353; font-size: 12px; }
+    td { padding: 6px 4px; text-align: center; border: 1px solid #d0d7de; white-space: nowrap; }
+    tr:hover td { background: #f8f9fa; }
+    .serial-cell { background: #f0f4f8; font-weight: 600; color: #1C4353; font-size: 13px; }
+    .total-cell { background: #fffbeb; font-weight: 600; color: #92400e; font-size: 13px; }
+    .calc-cell { color: #0d9488; font-weight: 600; }
+    .month-row { background: #e6fffa; font-weight: 600; }
+    .empty { text-align: center; padding: 30px; color: #666; }
+
+    .hidden { display: none !important; }
     .scan-box { position: relative; width: 100%; max-width: 420px; margin: 10px auto; border-radius: 10px; overflow: hidden; border: 3px solid #2B5F75; background: #000; }
     video { width: 100%; height: auto; display: block; }
     .scan-frame { position: absolute; inset: 0; border: 2px solid #E8A33D; box-shadow: inset 0 0 0 9999px rgba(0,0,0,0.4); pointer-events: none; }
-    .hidden { display: none !important; }
-
-    .history-section { margin-top: 20px; }
-    .history-title { font-size: 15px; font-weight: 600; margin-bottom: 10px; color: #333; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
-    .table-wrap { overflow-x: auto; border-radius: 6px; border: 1px solid #1C4353; background: white; }
-    .history-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 1400px; }
-    
-    .history-table th { 
-      background: #2B5F75; 
-      color: white; 
-      padding: 8px 6px; 
-      text-align: center; 
-      border: 1px solid #1C4353; 
-      font-weight: 500;
-      white-space: nowrap;
-    }
-    .history-table th.round-group { 
-      background: #1C4353; 
-      font-size: 13px; 
-      font-weight: 600; 
-      padding: 10px 6px;
-    }
-    .history-table th.serial-col { 
-      background: #1C4353; 
-      font-weight: 600; 
-      min-width: 80px;
-    }
-    .history-table th.total-col { 
-      background: #1C4353; 
-      font-weight: 600; 
-      min-width: 120px;
-    }
-
-    .history-table td { 
-      padding: 6px 6px; 
-      text-align: center; 
-      border: 1px solid #d0d7de; 
-      white-space: nowrap;
-      background: white;
-    }
-    .history-table td.serial-cell { 
-      background: #f8fafc; 
-      font-weight: 600; 
-      color: #1C4353;
-      text-align: left;
-      padding-left: 10px;
-    }
-    .history-table td.weight-cell { 
-      font-weight: 600; 
-      color: #2B5F75;
-    }
-    .history-table td.total-cell { 
-      background: #fff3cd; 
-      font-weight: bold; 
-      color: #856404;
-    }
-    .history-table tr:hover td:not(.serial-cell):not(.total-cell) { 
-      background: #f8f9fa; 
-    }
-
-    .tank-list { background: white; border-radius: 10px; padding: 14px; margin-top: 14px; border: 1px solid #e5e5e5; max-width: 700px; margin-left: auto; margin-right: auto; }
-    .tank-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
-    .tank-item:hover { background: #f9f6f0; }
-    .tank-item:last-child { border-bottom: none; }
-    .tank-item-left { flex: 1; }
-    .tank-item-serial { font-weight: 600; color: #2B5F75; }
-    .tank-item-info { font-size: 13px; color: #666; }
-    .tank-item-status { font-size: 12px; padding: 2px 8px; border-radius: 10px; margin-right: 8px; }
-    .status-active { background: #dcfce7; color: #166534; }
-    .status-empty { background: #fef3c7; color: #92400e; }
-
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-    .modal { background: white; border-radius: 12px; padding: 24px; width: 100%; max-width: 360px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
-    .modal-title { font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #333; }
-    .modal-text { font-size: 14px; color: #555; margin-bottom: 16px; line-height: 1.5; white-space: pre-line; }
-    .modal-error { color: #dc2626; font-size: 13px; margin-top: 6px; min-height: 18px; }
-    .modal-buttons { display: flex; gap: 8px; margin-top: 16px; }
-    .modal-buttons button { flex: 1; padding: 10px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; }
-    .btn-cancel { background: #e5e7eb; color: #333; }
-    .btn-cancel:hover { background: #d1d5db; }
-    .btn-confirm { background: #dc2626; color: white; }
-    .btn-confirm:hover { background: #b91c1c; }
   </style>
 </head>
 <body>
 
-<div class="alert alert-error" id="secureWarning">
-  ⚠️ เปิดผ่านไฟล์ในเครื่อง — กล้องจะไม่ทำงาน แนะนำให้พิมพ์เลขถังหรืออัปโหลดขึ้น OneDrive/Google Drive เพื่อใช้กล้อง
+<!-- 📌 แถบสถานะเชื่อมต่อ Excel -->
+<div class="sync-bar">
+  <span class="sync-status" id="syncStatus">🔄 กำลังโหลดข้อมูลจาก Excel...</span>
+  <button class="sync-btn" id="btnRefresh">🔄 โหลดข้อมูลล่าสุด</button>
 </div>
-<div class="alert alert-success hidden" id="successNote">
-  ✅ เปิดผ่าน HTTPS — กล้องพร้อมใช้งาน! กดปุ่ม "เปิดกล้องสแกน" เพื่อเริ่ม
+
+<div class="alert alert-info">
+  📊 ข้อมูลตรงกันทุกเครื่อง — เชื่อมกับไฟล์ Excel บน OneDrive<br>
+  📋 ดูข้อมูล: ครั้งเดียว | รายวัน | รายเดือน | ทั้งหมด
 </div>
 
 <div class="top-controls">
   <div class="btn-bar">
-    <button class="btn btn-primary" id="btnScan">📷 เปิดกล้องสแกน</button>
-    <button class="btn btn-ghost" id="btnUpload">🖼️ อัปโหลดรูป QR</button>
-    <input type="file" id="fileQr" accept="image/*" class="hidden" />
+    <button class="btn btn-primary" id="btnScan">📷 สแกน QR</button>
+    <button class="btn btn-ghost" id="btnOpenExcel">📂 เปิด Excel</button>
   </div>
-
   <div class="scan-box hidden" id="scanWrap">
     <video id="video" autoplay playsinline muted></video>
     <div class="scan-frame"></div>
   </div>
-
   <div class="search-row">
-    <input type="text" id="serialInput" placeholder="พิมพ์เลขถัง เช่น 1009" />
+    <input type="text" id="serialInput" placeholder="พิมพ์เลขถัง เช่น 001" />
     <button class="btn btn-primary" id="btnSearch">ค้นหา</button>
   </div>
-
-  <div class="action-bar">
-    <button class="btn btn-ghost" id="btnAllTanks">📋 รายการถังทั้งหมด (<span id="tankCount">0</span>)</button>
-    <button class="btn btn-ghost" id="btnExportTanks">📥 รหัสถังทั้งหมด</button>
-    <button class="btn btn-ghost" id="btnExportDaily">📅 ประวัติรายวัน</button>
-    <button class="btn btn-ghost" id="btnExportAll">📊 ประวัติทั้งหมด</button>
-    <button class="btn btn-danger" id="btnDeleteAll">🗑️ ลบทั้งหมด</button>
+  
+  <!-- 📌 ปุ่มดูประวัติ 3 แบบ -->
+  <div class="btn-bar" style="margin-top:12px;">
+    <button class="btn btn-ghost active" data-view="single">📋 ข้อมูลครั้ง</button>
+    <button class="btn btn-ghost" data-view="daily">📅 รายวัน</button>
+    <button class="btn btn-ghost" data-view="monthly">📆 รายเดือน</button>
+    <button class="btn btn-ghost" data-view="all">📊 ทั้งหมด</button>
   </div>
-</div>
-
-<div class="tank-list hidden" id="tankListContainer">
-  <div style="font-weight:600; margin-bottom:10px; color:#333;">📋 รายการถังแก๊สทั้งหมด</div>
-  <div id="tankList"></div>
-  <button class="btn btn-ghost" style="margin-top:10px; width:100%;" id="btnCloseTankList">ปิดรายการ</button>
 </div>
 
 <div class="tank-header" id="tankHeader">
-  <div class="tank-serial" id="tankSerial">#1009</div>
-  <div class="tank-stats" id="tankStats">ประวัติการอัด 0 ครั้ง · น้ำหนักรวม 0.00 กก.</div>
+  <div class="tank-serial" id="tankSerial">#—</div>
+  <div class="tank-stats" id="tankStats">ค้นหาเลขถังเพื่อดูข้อมูล</div>
 </div>
 
-<div class="empty-note" id="emptyNote">ยังไม่มีประวัติการอัดของถังนี้</div>
-
-<div style="max-width:700px; margin:0 auto;">
-  <button class="btn-add" id="toggleForm">+ บันทึกการอัดครั้งใหม่</button>
+<div style="max-width:760px; margin:0 auto;">
+  <button class="btn-add" id="toggleForm">+ บันทึกข้อมูล (ครั้งที่ 1 / 2 / 3)</button>
 </div>
 
 <div class="form-container hidden" id="formContainer">
-  <div class="form-row">
+  <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
     <div class="form-group">
-      <label>📅 วันที่</label>
-      <input type="date" id="fDate" />
+      <label>เลขถังแก๊ส</label>
+      <input type="text" id="fSerial" readonly />
     </div>
     <div class="form-group">
-      <label>🔢 ครั้งที่</label>
+      <label>บันทึกครั้งที่</label>
       <input type="number" id="fRound" value="1" readonly />
     </div>
   </div>
 
-  <div class="form-row">
+  <div class="form-title">📋 ข้อมูลการอัด</div>
+  <div class="form-grid">
     <div class="form-group">
-      <label>⚖️ น้ำหนักก่อนอัด (กก.)</label>
-      <input type="number" step="0.01" id="fBefore" placeholder="0.00" />
+      <label>วันที่</label>
+      <input type="date" id="fDate" />
     </div>
     <div class="form-group">
-      <label>⚖️ น้ำหนักหลังอัด (กก.)</label>
-      <input type="number" step="0.01" id="fAfter" placeholder="0.00" />
+      <label>น้ำหนักก่อนอัด (กก.)</label>
+      <input type="number" step="0.01" id="fBefore" placeholder="0.00" oninput="calcWeight()" />
     </div>
-  </div>
-
-  <div class="form-group" style="margin-bottom:14px;">
-    <label>📊 แรงดันแก๊ส</label>
-    <input type="number" step="0.01" id="fPress" placeholder="0.00" />
-  </div>
-
-  <div class="form-row-3">
+    <div class="form-group">
+      <label>น้ำหนักหลังอัด (กก.)</label>
+      <input type="number" step="0.01" id="fAfter" placeholder="0.00" oninput="calcWeight()" />
+    </div>
+    <div class="form-group">
+      <label>รวมน้ำหนัก/KG</label>
+      <input type="text" id="fWeight" readonly placeholder="อัตโนมัติ" />
+      <div class="calc">= หลัง − ก่อน</div>
+    </div>
+    <div class="form-group">
+      <label>แรงดันแก๊ส</label>
+      <input type="number" step="0.01" id="fPress" placeholder="0.00" />
+    </div>
     <div class="form-group">
       <label>CH4 (%)</label>
       <input type="number" step="0.01" id="fCH4" placeholder="—" />
@@ -229,409 +159,330 @@
       <label>H2S (ppm)</label>
       <input type="number" step="0.01" id="fH2S" placeholder="—" />
     </div>
-  </div>
-
-  <div class="form-row">
     <div class="form-group">
-      <label>📏 มิเตอร์เริ่ม</label>
-      <input type="number" id="fMStart" placeholder="—" />
+      <label>Gas Meter Start</label>
+      <input type="number" step="0.01" id="fMStart" placeholder="0.00" oninput="calcMeter()" />
     </div>
     <div class="form-group">
-      <label>📏 มิเตอร์สิ้นสุด</label>
-      <input type="number" id="fMEnd" placeholder="—" />
+      <label>Gas Meter Finish</label>
+      <input type="number" step="0.01" id="fMEnd" placeholder="0.00" oninput="calcMeter()" />
+    </div>
+    <div class="form-group">
+      <label>รวม Gas Meter/M3</label>
+      <input type="text" id="fMTotal" readonly placeholder="อัตโนมัติ" />
+      <div class="calc">= Finish − Start</div>
     </div>
   </div>
 
-  <button class="btn-submit" id="btnSave">✅ บันทึกข้อมูล</button>
+  <button class="btn-submit" id="btnSave">✅ บันทึกข้อมูลครั้งนี้</button>
 </div>
 
-<div class="history-section" id="historySection" style="display:none;">
-  <div class="history-title">
-    <span>📋 ประวัติการอัด (แยกตามครั้ง)</span>
-    <button class="btn btn-danger-small" id="btnClearHistory">🗑️ ลบประวัติถังนี้</button>
-  </div>
-  <div class="table-wrap">
-    <table class="history-table" id="historyTable">
-      <thead>
-        <tr>
-          <th class="serial-col" rowspan="2">เลขถัง</th>
-          <th class="round-group" colspan="12">รายละเอียดการอัด</th>
-          <th class="total-col" rowspan="2">น้ำหนักรวม</th>
-        </tr>
-        <tr id="subHeaderRow">
-          <th>ครั้งที่</th><th>วันที่</th><th>ก่อน</th><th>หลัง</th><th>อัดได้</th><th>แรงดัน</th><th>CH4</th><th>CO2</th><th>H2S</th><th>มิเตอร์เริ่ม</th><th>มิเตอร์จบ</th><th>ปริมาณ</th>
-        </tr>
-      </thead>
-      <tbody id="historyBody"></tbody>
-    </table>
-  </div>
-</div>
-
-<div class="modal-overlay hidden" id="passwordModal">
-  <div class="modal">
-    <div class="modal-title" id="modalTitle">🔐 ยืนยันการลบ</div>
-    <div class="modal-text" id="modalText">กรุณาใส่รหัสผ่านเพื่อดำเนินการ</div>
-    <input type="password" id="modalPassword" placeholder="ใส่รหัสผ่าน..." style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; font-size:15px;" />
-    <div class="modal-error" id="modalError"></div>
-    <div class="modal-buttons">
-      <button class="btn-cancel" id="modalCancel">ยกเลิก</button>
-      <button class="btn-confirm" id="modalConfirm">ยืนยัน ลบ!</button>
-    </div>
-  </div>
-</div>
+<!-- 📋 ตารางแสดงผล -->
+<div class="table-wrap" id="tableWrap" style="display:none;"></div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const ADMIN_PASSWORD = "1234";
-  const STORAGE_KEY = "GasTankData_v5";
-
+  // ==================== 📌 ลิงก์ไฟล์ Excel ====================
+  const EXCEL_URL = "https://1drv.ms/x/c/a6b0a5d5f66cf6bd/IQBSiAtQXkQtR7ttVN9BSrshAQM1BPtcZlElR0-7rDXgVAM?e=hDKdxt";
+  const EXCEL_DOWNLOAD_URL = EXCEL_URL.replace('?e=', '?download=1');
+  
   let tankDB = {};
-  let currentSerial = "1009";
-  let pendingAction = null;
-  let scanning = false, videoStream = null;
-  const canvas = document.createElement("canvas"), ctx = canvas.getContext("2d");
+  let currentSerial = null;
+  let currentView = 'single';
+  let videoStream = null;
+  const canvas = document.createElement('canvas'), ctx = canvas.getContext('2d');
 
-  const SAMPLE_DATA = {
-    "1009": [
-      {d:"2026-08-31", b:"37.80", a:"38.38", w:"0.58", p:"24.83", ch4:"62.5", co2:"35.2", h2s:"12", ms:"123400", me:"123450", mm:"50"},
-      {d:"2026-08-31", b:"38.38", a:"38.96", w:"0.58", p:"24.83", ch4:"63.0", co2:"34.8", h2s:"10", ms:"123450", me:"123460", mm:"10"},
-      {d:"2026-09-01", b:"38.96", a:"39.54", w:"0.58", p:"24.83", ch4:"62.8", co2:"35.0", h2s:"11", ms:"123460", me:"123470", mm:"10"}
-    ],
-    "1085": [],
-    "1105": [],
-    "1108": []
+  // ==================== คำนวณอัตโนมัติ ====================
+  window.calcWeight = function() {
+    const b = parseFloat(document.getElementById('fBefore').value) || 0;
+    const a = parseFloat(document.getElementById('fAfter').value) || 0;
+    document.getElementById('fWeight').value = (a - b).toFixed(2);
+  };
+  window.calcMeter = function() {
+    const s = parseFloat(document.getElementById('fMStart').value) || 0;
+    const e = parseFloat(document.getElementById('fMEnd').value) || 0;
+    document.getElementById('fMTotal').value = (e - s).toFixed(2);
   };
 
-  function loadData() {
+  // ==================== โหลดข้อมูลจาก Excel ====================
+  async function loadFromExcel() {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      tankDB = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(SAMPLE_DATA));
-    } catch (e) {
-      tankDB = JSON.parse(JSON.stringify(SAMPLE_DATA));
+      document.getElementById('syncStatus').textContent = "🔄 กำลังโหลดจาก Excel...";
+      const res = await fetch(EXCEL_DOWNLOAD_URL);
+      if (!res.ok) throw new Error("ไม่สามารถอ่านไฟล์ได้");
+      const buf = await res.arrayBuffer();
+      const wb = XLSX.read(buf, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      
+      tankDB = {};
+      for (let i = 2; i < data.length; i++) {
+        const row = data[i];
+        if (!row[0]) continue;
+        const serial = String(row[0]).trim();
+        if (!tankDB[serial]) tankDB[serial] = [];
+        // ครั้งที่ 1
+        if (row[2]) tankDB[serial].push({ round:1, date:row[2], before:row[3], after:row[4], weight:row[5], pressure:row[6], ch4:row[7], co2:row[8], h2s:row[9], meterStart:row[10], meterEnd:row[11], meterTotal:row[12] });
+        // ครั้งที่ 2
+        if (row[14]) tankDB[serial].push({ round:2, date:row[14], before:row[15], after:row[16], weight:row[17], pressure:row[18], ch4:row[19], co2:row[20], h2s:row[21], meterStart:row[22], meterEnd:row[23], meterTotal:row[24] });
+        // ครั้งที่ 3
+        if (row[26]) tankDB[serial].push({ round:3, date:row[26], before:row[27], after:row[28], weight:row[29], pressure:row[30], ch4:row[31], co2:row[32], h2s:row[33], meterStart:row[34], meterEnd:row[35], meterTotal:row[36] });
+      }
+      
+      document.getElementById('syncStatus').textContent = "✅ ซิงค์ข้อมูลล่าสุดแล้ว";
+      setTimeout(() => document.getElementById('syncStatus').textContent = "🔄 พร้อมใช้งาน", 3000);
+      
+      if (currentSerial) showTank(currentSerial);
+    } catch (err) {
+      console.error(err);
+      document.getElementById('syncStatus').textContent = "⚠️ โหลดไม่ได้ — ตรวจสิทธิ์ไฟล์";
     }
-    updateTankCount();
   }
 
-  function saveData() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(tankDB));
-    updateTankCount();
+  // ==================== จัดรูปแบบวันที่ ====================
+  function getMonthKey(dateStr) {
+    if (!dateStr) return "ไม่ระบุ";
+    const d = new Date(dateStr + "T00:00:00");
+    if (isNaN(d.getTime())) return dateStr.slice(0, 7);
+    return d.toLocaleDateString('th-TH', { year:'numeric', month:'long' });
   }
 
-  function updateTankCount() {
-    document.getElementById("tankCount").textContent = Object.keys(tankDB).length;
+  // ==================== แสดงข้อมูลตามรูปแบบที่เลือก ====================
+  function renderView(serial, view) {
+    const records = tankDB[serial] || [];
+    const wrap = document.getElementById('tableWrap');
+    wrap.style.display = 'block';
+    
+    if (records.length === 0) {
+      wrap.innerHTML = '<div class="empty">ยังไม่มีข้อมูลการอัด</div>';
+      return;
+    }
+
+    // เรียงข้อมูลล่าสุดก่อน
+    const sorted = [...records].sort((a,b) => new Date(b.date) - new Date(a.date));
+
+    if (view === 'single') {
+      // แสดงครั้งที่ 1,2,3 แถวเดียว
+      const r1 = records.find(r => r.round === 1) || {};
+      const r2 = records.find(r => r.round === 2) || {};
+      const r3 = records.find(r => r.round === 3) || {};
+      const totalKG = ((parseFloat(r1.weight)||0)+(parseFloat(r2.weight)||0)+(parseFloat(r3.weight)||0)).toFixed(2);
+      
+      wrap.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th rowspan="2">เลขถัง</th>
+              <th colspan="11" class="th-group">ครั้งที่ 1</th>
+              <th colspan="11" class="th-group">ครั้งที่ 2</th>
+              <th colspan="11" class="th-group">ครั้งที่ 3</th>
+              <th rowspan="2">รวม KG<br>3 ครั้ง</th>
+            </tr>
+            <tr>
+              <th>วันที่</th><th>ก่อน</th><th>หลัง</th><th>KG</th><th>แรงดัน</th><th>CH4</th><th>CO2</th><th>H2S</th><th>M.Start</th><th>M.Finish</th><th>M3</th>
+              <th>วันที่</th><th>ก่อน</th><th>หลัง</th><th>KG</th><th>แรงดัน</th><th>CH4</th><th>CO2</th><th>H2S</th><th>M.Start</th><th>M.Finish</th><th>M3</th>
+              <th>วันที่</th><th>ก่อน</th><th>หลัง</th><th>KG</th><th>แรงดัน</th><th>CH4</th><th>CO2</th><th>H2S</th><th>M.Start</th><th>M.Finish</th><th>M3</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="serial-cell">${serial}</td>
+              <!-- ครั้งที่ 1 -->
+              <td>${r1.date||'-'}</td><td>${r1.before||'-'}</td><td>${r1.after||'-'}</td><td class="calc-cell">${r1.weight||'-'}</td><td>${r1.pressure||'-'}</td><td>${r1.ch4||'-'}</td><td>${r1.co2||'-'}</td><td>${r1.h2s||'-'}</td><td>${r1.meterStart||'-'}</td><td>${r1.meterEnd||'-'}</td><td class="calc-cell">${r1.meterTotal||'-'}</td>
+              <!-- ครั้งที่ 2 -->
+              <td>${r2.date||'-'}</td><td>${r2.before||'-'}</td><td>${r2.after||'-'}</td><td class="calc-cell">${r2.weight||'-'}</td><td>${r2.pressure||'-'}</td><td>${r2.ch4||'-'}</td><td>${r2.co2||'-'}</td><td>${r2.h2s||'-'}</td><td>${r2.meterStart||'-'}</td><td>${r2.meterEnd||'-'}</td><td class="calc-cell">${r2.meterTotal||'-'}</td>
+              <!-- ครั้งที่ 3 -->
+              <td>${r3.date||'-'}</td><td>${r3.before||'-'}</td><td>${r3.after||'-'}</td><td class="calc-cell">${r3.weight||'-'}</td><td>${r3.pressure||'-'}</td><td>${r3.ch4||'-'}</td><td>${r3.co2||'-'}</td><td>${r3.h2s||'-'}</td><td>${r3.meterStart||'-'}</td><td>${r3.meterEnd||'-'}</td><td class="calc-cell">${r3.meterTotal||'-'}</td>
+              <!-- รวม -->
+              <td class="total-cell">${totalKG}</td>
+            </tr>
+          </tbody>
+        </table>`;
+
+    } else if (view === 'daily') {
+      // รายวัน — แยกตามวันที่ เรียงล่าสุดก่อน
+      wrap.innerHTML = `
+        <table class="small">
+          <thead><tr><th>วันที่</th><th>ครั้งที่</th><th>น้ำหนักรวม (กก.)</th><th>รวม Gas (M³)</th><th>แรงดัน</th><th>CH4 (%)</th></tr></thead>
+          <tbody>
+            ${sorted.map(r => `
+              <tr>
+                <td>${r.date||'-'}</td>
+                <td>${r.round}</td>
+                <td class="calc-cell">${r.weight||'-'}</td>
+                <td class="calc-cell">${r.meterTotal||'-'}</td>
+                <td>${r.pressure||'-'}</td>
+                <td>${r.ch4||'-'}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>`;
+
+    } else if (view === 'monthly') {
+      // รายเดือน — รวมผลตามเดือน
+      const months = {};
+      sorted.forEach(r => {
+        const m = getMonthKey(r.date);
+        if (!months[m]) months[m] = { count:0, weight:0, m3:0 };
+        months[m].count++;
+        months[m].weight += parseFloat(r.weight)||0;
+        months[m].m3 += parseFloat(r.meterTotal)||0;
+      });
+      
+      wrap.innerHTML = `
+        <table class="small">
+          <thead><tr><th>เดือน</th><th>ครั้งทั้งหมด</th><th>น้ำหนักรวม (กก.)</th><th>ปริมาณแก๊สรวม (M³)</th></tr></thead>
+          <tbody>
+            ${Object.entries(months).map(([m,v]) => `
+              <tr class="month-row">
+                <td>${m}</td>
+                <td>${v.count} ครั้ง</td>
+                <td class="calc-cell">${v.weight.toFixed(2)}</td>
+                <td class="calc-cell">${v.m3.toFixed(2)}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>`;
+
+    } else if (view === 'all') {
+      // ทั้งหมด — แสดงรายละเอียดทุกครั้ง + สรุป
+      const totalKG = sorted.reduce((s,r)=>s+(parseFloat(r.weight)||0),0);
+      const totalM3 = sorted.reduce((s,r)=>s+(parseFloat(r.meterTotal)||0),0);
+      
+      wrap.innerHTML = `
+        <table class="small">
+          <thead><tr><th>วันที่</th><th>ครั้งที่</th><th>ก่อนอัด</th><th>หลังอัด</th><th>น้ำหนักรวม</th><th>แรงดัน</th><th>CH4</th><th>CO2</th><th>M.Start</th><th>M.Finish</th><th>รวม M³</th></tr></thead>
+          <tbody>
+            ${sorted.map(r => `
+              <tr>
+                <td>${r.date||'-'}</td>
+                <td>${r.round}</td>
+                <td>${r.before||'-'}</td>
+                <td>${r.after||'-'}</td>
+                <td class="calc-cell">${r.weight||'-'}</td>
+                <td>${r.pressure||'-'}</td>
+                <td>${r.ch4||'-'}</td>
+                <td>${r.co2||'-'}</td>
+                <td>${r.meterStart||'-'}</td>
+                <td>${r.meterEnd||'-'}</td>
+                <td class="calc-cell">${r.meterTotal||'-'}</td>
+              </tr>`).join('')}
+            <tr class="total-row">
+              <td colspan="4">📊 สรุปทั้งหมด ${sorted.length} ครั้ง</td>
+              <td class="total-cell">${totalKG.toFixed(2)} กก.</td>
+              <td>-</td><td>-</td><td>-</td><td colspan="2">📊 รวมปริมาณแก๊ส</td>
+              <td class="total-cell">${totalM3.toFixed(2)} M³</td>
+            </tr>
+          </tbody>
+        </table>`;
+    }
   }
 
-  function renderTank(serial) {
-    if (!serial) return;
+  // ==================== แสดงข้อมูลถังที่เลือก ====================
+  function showTank(serial) {
     currentSerial = serial;
-    if (!tankDB[serial]) tankDB[serial] = [];
-
-    const recs = tankDB[serial];
-    document.getElementById("tankSerial").textContent = "#" + serial;
-    const totalW = recs.reduce((s,r) => s + (parseFloat(r.w)||0), 0).toFixed(2);
-    document.getElementById("tankStats").textContent = `อัด ${recs.length} ครั้ง · รวม ${totalW} กก.`;
-    document.getElementById("fRound").value = recs.length + 1;
-    document.getElementById("serialInput").value = serial;
-
-    if (recs.length === 0) {
-      document.getElementById("emptyNote").style.display = "block";
-      document.getElementById("historySection").style.display = "none";
-    } else {
-      document.getElementById("emptyNote").style.display = "none";
-      document.getElementById("historySection").style.display = "block";
-      renderHistoryTable(serial);
+    document.getElementById('tankSerial').textContent = "#" + serial;
+    const records = tankDB[serial] || [];
+    document.getElementById('tankStats').textContent = `พบทั้งหมด ${records.length} ครั้ง`;
+    
+    document.getElementById('fSerial').value = serial;
+    document.getElementById('fRound').value = Math.min(records.length + 1, 3);
+    document.getElementById('fDate').valueAsDate = new Date();
+    
+    renderView(serial, currentView);
+    
+    document.getElementById('formContainer').classList.remove('hidden');
+    if (records.length >= 3) {
+      document.getElementById('formContainer').classList.add('hidden');
+      alert("✅ บันทึกครบ 3 ครั้งแล้ว! เปิดไฟล์ Excel เพื่อเพิ่มถังใหม่");
     }
   }
 
-  function renderHistoryTable(serial) {
-    const recs = tankDB[serial] || [];
-    const tbody = document.getElementById("historyBody");
-    tbody.innerHTML = "";
-
-    recs.forEach((r, idx) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td class="serial-cell">${serial}</td>
-        <td>${idx+1}</td>
-        <td>${r.d}</td>
-        <td>${r.b}</td>
-        <td>${r.a}</td>
-        <td class="weight-cell">${r.w}</td>
-        <td>${r.p}</td>
-        <td>${r.ch4 || "—"}</td>
-        <td>${r.co2 || "—"}</td>
-        <td>${r.h2s || "—"}</td>
-        <td>${r.ms || "—"}</td>
-        <td>${r.me || "—"}</td>
-        <td>${r.mm || "—"}</td>
-      `;
-      tbody.appendChild(tr);
+  // ==================== ปุ่มสลับมุมมอง ====================
+  document.querySelectorAll('[data-view]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('[data-view]').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      currentView = this.dataset.view;
+      if (currentSerial) renderView(currentSerial, currentView);
     });
-  }
-
-  function showPasswordModal(title, text, onSuccess) {
-    document.getElementById("modalTitle").textContent = title;
-    document.getElementById("modalText").textContent = text;
-    document.getElementById("modalPassword").value = "";
-    document.getElementById("modalError").textContent = "";
-    document.getElementById("passwordModal").classList.remove("hidden");
-    pendingAction = onSuccess;
-  }
-
-  function hidePasswordModal() {
-    document.getElementById("passwordModal").classList.add("hidden");
-    pendingAction = null;
-  }
-
-  document.getElementById("modalCancel").onclick = hidePasswordModal;
-  document.getElementById("modalConfirm").onclick = function() {
-    const input = document.getElementById("modalPassword").value;
-    if (input === ADMIN_PASSWORD) {
-      hidePasswordModal();
-      if (pendingAction) pendingAction();
-    } else {
-      document.getElementById("modalError").textContent = "❌ รหัสผ่านไม่ถูกต้อง!";
-    }
-  };
-  document.getElementById("modalPassword").addEventListener("keydown", e => {
-    if (e.key === "Enter") document.getElementById("modalConfirm").click();
   });
 
-  document.getElementById("btnClearHistory").onclick = function() {
-    showPasswordModal(
-      "🗑️ ลบประวัติถังนี้",
-      `ยืนยันลบประวัติทั้งหมดของถัง #${currentSerial}?\n⚠️ ข้อมูลจะหายไปและกู้คืนไม่ได้!`,
-      () => {
-        tankDB[currentSerial] = [];
-        saveData();
-        renderTank(currentSerial);
-        alert(`✅ ลบประวัติถัง #${currentSerial} เรียบร้อย`);
-      }
-    );
-  };
-
-  document.getElementById("btnDeleteAll").onclick = function() {
-    showPasswordModal(
-      "⚠️ ลบข้อมูลทั้งหมด",
-      `ยืนยันลบประวัติทุกถัง?\n⚠️ การกระทำนี้ไม่สามารถยกเลิกได้!`,
-      () => {
-        Object.keys(tankDB).forEach(s => { tankDB[s] = []; });
-        saveData();
-        renderTank(currentSerial);
-        alert("✅ ลบข้อมูลทั้งหมดเรียบร้อย");
-      }
-    );
-  };
-
-  document.getElementById("toggleForm").onclick = () => {
-    const form = document.getElementById("formContainer");
-    form.classList.toggle("hidden");
-    if (!form.classList.contains("hidden")) {
-      document.getElementById("fDate").valueAsDate = new Date();
-    }
-  };
-
-  document.getElementById("btnSave").onclick = function() {
-    const d = document.getElementById("fDate").value;
-    const b = document.getElementById("fBefore").value;
-    const a = document.getElementById("fAfter").value;
-    const p = document.getElementById("fPress").value;
-    const ch4 = document.getElementById("fCH4").value;
-    const co2 = document.getElementById("fCO2").value;
-    const h2s = document.getElementById("fH2S").value;
-    const ms = document.getElementById("fMStart").value;
-    const me = document.getElementById("fMEnd").value;
-
-    if (!d || !b || !a) return alert("⚠️ กรุณาใส่วันที่, น้ำหนักก่อนและหลังอัด");
-
-    const w = (parseFloat(a) - parseFloat(b)).toFixed(2);
-    const mm = (ms && me) ? (parseFloat(me) - parseFloat(ms)).toFixed(2) : "";
-
-    tankDB[currentSerial].push({d, b, a, w, p, ch4, co2, h2s, ms, me, mm});
-    saveData();
-    renderTank(currentSerial);
-
-    document.getElementById("formContainer").classList.add("hidden");
-    document.getElementById("fBefore").value = "";
-    document.getElementById("fAfter").value = "";
-    document.getElementById("fPress").value = "";
-    document.getElementById("fCH4").value = "";
-    document.getElementById("fCO2").value = "";
-    document.getElementById("fH2S").value = "";
-    document.getElementById("fMStart").value = "";
-    document.getElementById("fMEnd").value = "";
-
-    alert(`✅ บันทึกครั้งที่ ${tankDB[currentSerial].length} สำเร็จ\nน้ำหนักอัดได้: ${w} กก.`);
-  };
-
-  document.getElementById("btnSearch").onclick = function() {
-    let s = document.getElementById("serialInput").value.trim();
-    if (!s) return alert("⚠️ ใส่เลขถังก่อนค้นหา");
-    if (!tankDB[s]) {
-      if (confirm(`ไม่พบถัง #${s} ต้องการเพิ่มใหม่?`)) {
-        tankDB[s] = [];
-        saveData();
-      } else return;
-    }
-    renderTank(s);
-    document.getElementById("tankListContainer").classList.add("hidden");
-  };
-
-  document.getElementById("btnAllTanks").onclick = function() {
-    const container = document.getElementById("tankListContainer");
-    container.classList.toggle("hidden");
-    if (!container.classList.contains("hidden")) {
-      renderTankList();
-    }
-  };
-  document.getElementById("btnCloseTankList").onclick = () => {
-    document.getElementById("tankListContainer").classList.add("hidden");
-  };
-
-  function renderTankList() {
-    const list = document.getElementById("tankList");
-    list.innerHTML = "";
-    Object.keys(tankDB).sort((a,b) => parseInt(a)-parseInt(b)).forEach(s => {
-      const recs = tankDB[s];
-      const totalW = recs.reduce((x,r) => x + (parseFloat(r.w)||0), 0).toFixed(2);
-      const item = document.createElement("div");
-      item.className = "tank-item";
-      item.innerHTML = `
-        <div class="tank-item-left">
-          <span class="tank-item-status ${recs.length>0?'status-active':'status-empty'}">${recs.length>0?'มีข้อมูล':'ว่าง'}</span>
-          <span class="tank-item-serial">#${s}</span>
-          <div class="tank-item-info">อัด ${recs.length} ครั้ง · รวม ${totalW} กก.</div>
-        </div>
-        <span>▶</span>
-      `;
-      item.onclick = () => {
-        renderTank(s);
-        document.getElementById("tankListContainer").classList.add("hidden");
-      };
-      list.appendChild(item);
-    });
-  }
-
-  function exportFile(rows, sheetName, fileNamePrefix) {
-    if (typeof XLSX === 'undefined') return alert("⚠️ รอโหลดไลบรารี Excel ก่อนนะครับ");
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), sheetName);
-    const d = new Date();
-    const stamp = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    XLSX.writeFile(wb, `${fileNamePrefix}_${stamp}.xlsx`);
-  }
-
-  document.getElementById("btnExportTanks").onclick = function() {
-    const serials = Object.keys(tankDB).sort((a,b) => parseInt(a)-parseInt(b));
-    exportFile(serials.map((s,i) => {
-      const recs = tankDB[s];
-      const totalW = recs.reduce((x,r) => x + (parseFloat(r.w)||0), 0).toFixed(2);
-      const last = recs.length? recs[recs.length-1].d : "—";
-      return {
-        "ลำดับ": i+1, "เลขถัง": s, "จำนวนครั้ง": recs.length,
-        "วันที่ล่าสุด": last, "น้ำหนักรวม(กก.)": totalW,
-        "สถานะ": recs.length? "มีประวัติ" : "ว่าง"
-      };
-    }), "รหัสถังทั้งหมด", "รหัสถังทั้งหมด");
-    alert("✅ ดาวน์โหลดสำเร็จ");
-  };
-
-  document.getElementById("btnExportDaily").onclick = function() {
-    let all = [];
-    Object.entries(tankDB).forEach(([s,recs]) => {
-      recs.forEach((r,i) => all.push({
-        "เลขถัง": s, "ครั้งที่": i+1, "วันที่": r.d,
-        "ก่อนอัด": r.b, "หลังอัด": r.a, "อัดได้": r.w,
-        "แรงดัน": r.p, "CH4": r.ch4, "CO2": r.co2, "H2S": r.h2s,
-        "มิเตอร์เริ่ม": r.ms, "มิเตอร์จบ": r.me, "ปริมาณ": r.mm
-      }));
-    });
-    all.sort((a,b) => a["วันที่"].localeCompare(b["วันที่"]));
-    exportFile(all, "ตามวันที่", "ประวัติรายวัน");
-    alert("✅ ดาวน์โหลดสำเร็จ");
-  };
-
-  document.getElementById("btnExportAll").onclick = function() {
-    let all = [];
-    Object.entries(tankDB).sort((a,b) => parseInt(a[0])-parseInt(b[0])).forEach(([s,recs]) => {
-      recs.forEach((r,i) => all.push({
-        "เลขถัง": s, "ครั้งที่": i+1, "วันที่": r.d,
-        "ก่อนอัด": r.b, "หลังอัด": r.a, "อัดได้": r.w,
-        "แรงดัน": r.p, "CH4": r.ch4, "CO2": r.co2, "H2S": r.h2s,
-        "มิเตอร์เริ่ม": r.ms, "มิเตอร์จบ": r.me, "ปริมาณ": r.mm
-      }));
-    });
-    exportFile(all, "ทั้งหมด", "ประวัติทั้งหมด");
-    alert("✅ ดาวน์โหลดสำเร็จ");
-  };
-
-  document.getElementById("btnScan").onclick = async function() {
-    if (location.protocol === "file:") return alert("⚠️ เปิดผ่านไฟล์เครื่องไม่สามารถใช้กล้องได้ครับ");
-    try {
-      videoStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});
-      const video = document.getElementById("video");
-      video.srcObject = videoStream;
-      await video.play();
-      document.getElementById("scanWrap").classList.remove("hidden");
-      scanning = true;
-      scanLoop();
-    } catch(e) { alert("❌ เปิดกล้องไม่ได้: " + e.message); }
-  };
-
-  function scanLoop() {
-    if (!scanning) return;
-    const video = document.getElementById("video");
-    if (video.videoWidth) {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      ctx.drawImage(video,0,0);
-      const img = ctx.getImageData(0,0,canvas.width,canvas.height);
-      const code = jsQR(img.data,img.width,img.height);
-      if (code && code.data) {
-        stopScan();
-        const s = code.data.replace(/\D/g,"");
-        document.getElementById("serialInput").value = s;
-        document.getElementById("btnSearch").click();
-        return alert("✅ พบ: " + s);
-      }
-    }
-    requestAnimationFrame(scanLoop);
-  }
-
-  function stopScan() {
-    scanning = false;
-    if (videoStream) videoStream.getTracks().forEach(t=>t.stop());
-    document.getElementById("scanWrap").classList.add("hidden");
-  }
-
-  document.getElementById("btnUpload").onclick = () => document.getElementById("fileQr").click();
-  document.getElementById("fileQr").onchange = e => {
-    const f = e.target.files[0]; if (!f) return;
-    const img = new Image();
-    img.onload = () => {
-      canvas.width = img.width; canvas.height = img.height;
-      ctx.drawImage(img,0,0);
-      const d = ctx.getImageData(0,0,img.width,img.height);
-      const code = jsQR(d.data,d.width,d.height);
-      if (code && code.data) {
-        const s = code.data.replace(/\D/g,"");
-        document.getElementById("serialInput").value = s;
-        document.getElementById("btnSearch").click();
-        alert("✅ พบ: " + s);
-      } else alert("❌ อ่าน QR ไม่ได้");
+  // ==================== บันทึกข้อมูล ====================
+  document.getElementById('btnSave').addEventListener('click', function() {
+    const rec = {
+      round: parseInt(document.getElementById('fRound').value),
+      date: document.getElementById('fDate').value,
+      before: document.getElementById('fBefore').value,
+      after: document.getElementById('fAfter').value,
+      weight: document.getElementById('fWeight').value,
+      pressure: document.getElementById('fPress').value,
+      ch4: document.getElementById('fCH4').value,
+      co2: document.getElementById('fCO2').value,
+      h2s: document.getElementById('fH2S').value,
+      meterStart: document.getElementById('fMStart').value,
+      meterEnd: document.getElementById('fMEnd').value,
+      meterTotal: document.getElementById('fMTotal').value
     };
-    img.src = URL.createObjectURL(f);
-    e.target.value = "";
-  };
 
-  loadData();
-  if (location.protocol === "file:") {
-    document.getElementById("secureWarning").style.display = "block";
-  } else {
-    document.getElementById("secureWarning").style.display = "none";
-    document.getElementById("successNote").classList.remove("hidden");
+    const serial = document.getElementById('fSerial').value;
+    if (!serial || !rec.date) return alert("⚠️ กรุณากรอกเลขถังและวันที่");
+
+    if (!tankDB[serial]) tankDB[serial] = [];
+    tankDB[serial] = tankDB[serial].filter(r => r.round !== rec.round);
+    tankDB[serial].push(rec);
+
+    alert(`✅ บันทึกครั้งที่ ${rec.round} เรียบร้อย!\n\n📥 กด "โหลดข้อมูลล่าสุด" ที่อุปกรณ์อื่นเพื่อซิงค์ข้อมูล`);
+    
+    showTank(serial);
+    
+    // ล้างฟอร์ม
+    ['fBefore','fAfter','fWeight','fPress','fCH4','fCO2','fH2S','fMStart','fMEnd','fMTotal'].forEach(id => document.getElementById(id).value = '');
+  });
+
+  // ==================== ค้นหา / ปุ่มต่างๆ ====================
+  document.getElementById('btnSearch').addEventListener('click', () => {
+    const s = document.getElementById('serialInput').value.trim();
+    if (!s) return alert("⚠️ กรุณากรอกเลขถัง");
+    showTank(s);
+  });
+  document.getElementById('btnRefresh').addEventListener('click', loadFromExcel);
+  document.getElementById('btnOpenExcel').addEventListener('click', () => window.open(EXCEL_URL, '_blank'));
+  document.getElementById('toggleForm').addEventListener('click', () => {
+    let s = document.getElementById('serialInput').value.trim() || prompt("กรุณากรอกเลขถังแก๊ส:");
+    if (s) { document.getElementById('serialInput').value = s; showTank(s); }
+  });
+
+  // ==================== สแกน QR ====================
+  document.getElementById('btnScan').addEventListener('click', async function() {
+    const wrap = document.getElementById('scanWrap');
+    const video = document.getElementById('video');
+    wrap.classList.toggle('hidden');
+    if (!wrap.classList.contains('hidden')) {
+      videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      video.srcObject = videoStream;
+      video.onplay = () => { scanQR(); };
+    } else {
+      if (videoStream) videoStream.getTracks().forEach(t => t.stop());
+    }
+  });
+  function scanQR() {
+    const video = document.getElementById('video');
+    if (video.readyState < 2) return requestAnimationFrame(scanQR);
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0);
+    const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const code = jsQR(img.data, img.width, img.height);
+    if (code && code.data) {
+      if (videoStream) videoStream.getTracks().forEach(t => t.stop());
+      document.getElementById('scanWrap').classList.add('hidden');
+      document.getElementById('serialInput').value = code.data.trim();
+      showTank(code.data.trim());
+      return;
+    }
+    requestAnimationFrame(scanQR);
   }
-  renderTank(currentSerial);
+
+  loadFromExcel();
 });
 </script>
 </body>
