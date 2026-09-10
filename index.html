@@ -28,9 +28,11 @@
     .btn-danger-all:hover { background: #b71c1c; }
     .btn-edit { background: #42a5f5; color: white; border: none; }
     .btn-edit:hover { background: #1e88e5; }
+    .btn-export { background: #2e7d32; color: white; border: none; }
+    .btn-export:hover { background: #27692a; }
 
-    .search-row { display: flex; gap: 10px; margin-bottom: 18px; }
-    .search-input { flex: 1; padding: 12px 14px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; }
+    .search-row { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+    .search-input { flex: 1; min-width: 160px; padding: 12px 14px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; }
     .search-btn { padding: 12px 22px; background: #1976d2; color: white; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; font-weight: 500; }
     .search-btn:hover { background: #1565c0; }
 
@@ -40,6 +42,10 @@
     .tab-btn:hover:not(.active) { background: #f5f5f5; border-color: #bbb; }
     .tab-count { background: #1976d2; color: white; font-size: 12px; padding: 1px 8px; border-radius: 10px; margin-left: 4px; }
     .tab-btn.active .tab-count { background: #1565c0; }
+
+    .filter-bar { background: #fff; padding: 14px 18px; border-radius: 10px; margin-bottom: 18px; border: 1px solid #e0e0e0; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .filter-bar label { font-size: 14px; font-weight: 500; color: #333; }
+    .filter-bar input { padding: 10px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; }
 
     .tank-card { background: #1976d2; color: white; padding: 20px; border-radius: 10px; margin-bottom: 14px; }
     .tank-serial { font-size: 26px; font-weight: bold; margin-bottom: 6px; }
@@ -88,11 +94,11 @@
 <div class="sync-bar">
   <span class="sync-status" id="syncStatus">⏳ กำลังตรวจสอบการเชื่อมต่อ...</span>
   <button class="sync-btn" id="btnRefresh">🔄 โหลดข้อมูลล่าสุด</button>
-  <button class="sync-btn" id="btnExport">💾 บันทึกเป็น Excel</button>
+  <button class="sync-btn btn-export" id="btnExportCurrent">📥 ส่งออก Excel หน้านี้</button>
 </div>
 
 <div class="alert-box" id="alertBox">
-  ℹ️ ข้อมูลจะทำงานได้ทันที — กด "บันทึกเป็น Excel" เพื่อสำรองข้อมูลและส่งไปยัง Google Sheets ด้วยตัวเอง
+  ℹ️ ข้อมูลจะทำงานได้ทันที — กด "ส่งออก Excel" เพื่อสำรองข้อมูล
 </div>
 
 <div class="top-buttons">
@@ -111,14 +117,20 @@
 </div>
 
 <div class="view-tabs">
-  <!-- ✅ ปรับชื่อปุ่มตามที่ต้องการ -->
-  <button class="tab-btn active" data-view="single">📋 เก็บประวัติหมายเลขถัง <span class="tab-count" id="tankCount">0</span></button>
+  <button class="tab-btn active" data-view="alltanks">📋 รายงานหมายเลขถังทั้งหมด <span class="tab-count" id="tankCount">0</span></button>
   <button class="tab-btn" data-view="daily">📊 รายงานประจำวัน</button>
   <button class="tab-btn" data-view="monthly">📈 รายงานประจำเดือน</button>
   <button class="tab-btn" data-view="all">📂 ข้อมูลทั้งหมด</button>
 </div>
 
-<div class="tank-card" id="tankCard">
+<!-- ✅ แถบเลือกวันที่สำหรับรายงานประจำวัน -->
+<div class="filter-bar hidden" id="dailyFilter">
+  <label>📅 เลือกวันที่:</label>
+  <input type="date" id="selDate" />
+  <button class="sync-btn" id="btnShowDaily">🔍 แสดงข้อมูล</button>
+</div>
+
+<div class="tank-card hidden" id="tankCard">
   <div class="tank-serial" id="tankSerial">#—</div>
   <div class="tank-desc" id="tankDesc">ค้นหาเลขถังเพื่อดูข้อมูล</div>
 </div>
@@ -132,7 +144,7 @@
   </div>
 </div>
 
-<button class="add-btn" id="toggleForm">+ บันทึกข้อมูลใหม่ (ครั้งที่ 1 / 2 / 3)</button>
+<button class="add-btn hidden" id="toggleForm">+ บันทึกข้อมูลใหม่ (ครั้งที่ 1 / 2 / 3)</button>
 
 <div class="form-card hidden" id="formCard">
   <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
@@ -210,7 +222,8 @@ const PASSWORD_CLEAR_ALL = "clear999";
 let editMode = false;
 let tankDB = {};
 let currentSerial = null;
-let currentView = 'single';
+let currentView = 'alltanks';
+let selectedDailyDate = null;
 let videoStream = null;
 const canvas = document.createElement('canvas'), ctx = canvas.getContext('2d');
 
@@ -237,6 +250,21 @@ function toDDMMYYYY(date) {
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const year = d.getFullYear();
   return `${day}/${month}/${year}`;
+}
+
+// แปลง YYYY-MM-DD → DD/MM/YYYY
+function ymdToDmy(ymd) {
+  if (!ymd) return "";
+  const [y, m, d] = ymd.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+// แปลง DD/MM/YYYY → YYYY-MM-DD
+function dmyToYmd(dmy) {
+  if (!dmy) return "";
+  const m = dmy.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (!m) return "";
+  return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
 }
 
 function parseDateInput(val) {
@@ -365,14 +393,14 @@ document.addEventListener('DOMContentLoaded', function() {
       console.log("API ไม่พร้อมใช้งาน:", e.message);
     }
     apiAvailable = false;
-    setStatus("⚠️ ทำงานแบบออฟไลน์ — กด 'บันทึกเป็น Excel' เพื่อสำรองข้อมูล", 'err');
+    setStatus("⚠️ ทำงานแบบออฟไลน์ — กด 'ส่งออก Excel' เพื่อสำรองข้อมูล", 'err');
     return false;
   }
 
   async function loadFromSheet() {
     const ok = await checkAPI();
     if (!ok) {
-      alert("ℹ️ ไม่สามารถโหลดข้อมูลออนไลน์ได้ในขณะนี้\n\n👉 ทำงานแบบออฟไลน์แทน\n👉 กด 'บันทึกเป็น Excel' เพื่อเก็บข้อมูล");
+      alert("ℹ️ ไม่สามารถโหลดข้อมูลออนไลน์ได้ในขณะนี้\n\n👉 ทำงานแบบออฟไลน์แทน");
       renderCurrentView();
       return;
     }
@@ -421,7 +449,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   async function saveToSheet(rec) {
     if (!apiAvailable) {
-      alert("ℹ️ บันทึกสำเร็จในหน้าเว็บ\n⚠️ ยังไม่ได้ส่งขึ้นออนไลน์\n👉 กด 'บันทึกเป็น Excel' เพื่อสำรองข้อมูล");
+      alert("ℹ️ บันทึกสำเร็จในหน้าเว็บ\n⚠️ ยังไม่ได้ส่งขึ้นออนไลน์\n👉 กด 'ส่งออก Excel' เพื่อสำรองข้อมูล");
       return true;
     }
 
@@ -442,53 +470,141 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  function renderCurrentView() {
-    const container = document.getElementById('tableContainer');
-    const actionsDiv = document.getElementById('tankActions');
+  // ===== แสดง/ซ่อน ส่วนต่างๆ ตามหน้า =====
+  function setupViewUI(view) {
+    document.getElementById('dailyFilter').classList.add('hidden');
+    document.getElementById('tankCard').classList.add('hidden');
+    document.getElementById('formCard').classList.add('hidden');
+    document.getElementById('tankActions').classList.add('hidden');
+    document.getElementById('toggleForm').classList.add('hidden');
+    document.getElementById('tableContainer').style.display = 'block';
+    document.getElementById('serialInput').parentElement.style.display = 'none';
+    document.getElementById('btnScan').parentElement.style.display = 'none';
 
-    if (currentView === 'single') {
-      if (!currentSerial) {
-        container.style.display = 'none';
-        actionsDiv.classList.add('hidden');
-        document.getElementById('tankSerial').textContent = "#—";
-        document.getElementById('tankDesc').textContent = "ค้นหาเลขถังเพื่อดูข้อมูล";
-        return;
+    if (view === 'daily') {
+      document.getElementById('dailyFilter').classList.remove('hidden');
+      document.getElementById('selDate').valueAsDate = new Date();
+    }
+  }
+
+  // ===== สร้างข้อมูลแถวสำหรับส่งออก Excel =====
+  function buildExportRows(filterDate = null) {
+    const rows = [["เลขถังแก๊ส",
+      "ครั้งที่ 1","วันที่","น้ำหนักก่อนอัด (กก.)","น้ำหนักหลังอัด (กก.)","น้ำหนักรวมครั้งที่ 1","แรงดันแก๊ส","CH4","CO2","H2S","Gas Meter Start","Gas Meter Finish","รวม Gas Meter/M3",
+      "ครั้งที่ 2","วันที่","น้ำหนักก่อนอัด (กก.)","น้ำหนักหลังอัด (กก.)","น้ำหนักรวมครั้งที่ 2","แรงดันแก๊ส","CH4","CO2","H2S","Gas Meter Start","Gas Meter Finish","รวม Gas Meter/M3",
+      "ครั้งที่ 3","วันที่","น้ำหนักก่อนอัด (กก.)","น้ำหนักหลังอัด (กก.)","น้ำหนักรวมครั้งที่ 3","แรงดันแก๊ส","CH4","CO2","H2S","Gas Meter Start","Gas Meter Finish","รวม Gas Meter/M3",
+      "รวมน้ำหนัก"]];
+
+    Object.entries(tankDB).sort((a,b) => a[0].localeCompare(b[0])).forEach(([serial, records]) => {
+      let r1 = records.find(r => r.round === 1) || {};
+      let r2 = records.find(r => r.round === 2) || {};
+      let r3 = records.find(r => r.round === 3) || {};
+
+      // ถ้ามีการกรองตามวันที่ แสดงเฉพาะแถวที่ตรงกับวันที่นั้น
+      if (filterDate) {
+        const fdmy = ymdToDmy(filterDate);
+        r1 = r1.date === fdmy ? r1 : {};
+        r2 = r2.date === fdmy ? r2 : {};
+        r3 = r3.date === fdmy ? r3 : {};
+        // ถ้าไม่มีข้อมูลเลย ไม่แสดงแถวนี้
+        if (!r1.date && !r2.date && !r3.date) return;
       }
-      actionsDiv.classList.remove('hidden');
-      renderTankDetail(currentSerial);
+
+      const totalKG = ((parseFloat(r1.weight)||0)+(parseFloat(r2.weight)||0)+(parseFloat(r3.weight)||0)).toFixed(2);
+      rows.push([
+        serial,
+        r1.round||1, r1.date||'', r1.before||'', r1.after||'', r1.weight||'', r1.pressure||'', r1.ch4||'', r1.co2||'', r1.h2s||'', r1.meterStart||'', r1.meterEnd||'', r1.meterTotal||'',
+        r2.round||2, r2.date||'', r2.before||'', r2.after||'', r2.weight||'', r2.pressure||'', r2.ch4||'', r2.co2||'', r2.h2s||'', r2.meterStart||'', r2.meterEnd||'', r2.meterTotal||'',
+        r3.round||3, r3.date||'', r3.before||'', r3.after||'', r3.weight||'', r3.pressure||'', r3.ch4||'', r3.co2||'', r3.h2s||'', r3.meterStart||'', r3.meterEnd||'', r3.meterTotal||'',
+        totalKG
+      ]);
+    });
+    return rows;
+  }
+
+  // ===== ส่งออก Excel จากหน้าปัจจุบัน =====
+  function exportCurrentView() {
+    let filterDate = null;
+    let title = "ทะเบียนถังแก๊ส";
+
+    if (currentView === 'daily' && selectedDailyDate) {
+      filterDate = selectedDailyDate;
+      title = "รายงานประจำวัน_" + ymdToDmy(filterDate).replace(/\//g,'-');
+    } else if (currentView === 'monthly') {
+      title = "รายงานประจำเดือน";
+    }
+
+    const rows = buildExportRows(filterDate);
+    if (rows.length <= 1) {
+      alert("⚠️ ไม่มีข้อมูลสำหรับส่งออก");
       return;
     }
 
-    actionsDiv.classList.add('hidden');
-    document.getElementById('formCard').classList.add('hidden');
-    document.getElementById('tankCard').style.display = 'none';
-    container.style.display = 'block';
-
-    renderAllStandardView();
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    XLSX.utils.book_append_sheet(wb, ws, title);
+    XLSX.writeFile(wb, title + "_" + toDDMMYYYY(new Date()).replace(/\//g,'-') + ".xlsx");
   }
 
-  function renderTankDetail(serial) {
-    document.getElementById('tankCard').style.display = 'block';
-    document.getElementById('tankSerial').textContent = "#" + serial;
-    const records = tankDB[serial] || [];
-    document.getElementById('tankDesc').textContent = `พบทั้งหมด ${records.length} ครั้ง`;
-
+  function renderCurrentView() {
     const container = document.getElementById('tableContainer');
-    container.style.display = 'block';
+    setupViewUI(currentView);
 
-    const r1 = records.find(r => r.round === 1) || {};
-    const r2 = records.find(r => r.round === 2) || {};
-    const r3 = records.find(r => r.round === 3) || {};
+    if (currentView === 'alltanks' || currentView === 'all') {
+      renderAllStandardView();
+      return;
+    }
 
-    container.innerHTML = standardTableHeader() + buildStandardRow(serial, r1, r2, r3) + `</tbody></table>`;
+    if (currentView === 'daily') {
+      if (!selectedDailyDate) {
+        container.innerHTML = `<div style="padding:24px;text-align:center;color:#666;">📅 กรุณาเลือกวันที่แล้วกด "แสดงข้อมูล"</div>`;
+        return;
+      }
+      renderDailyView(selectedDailyDate);
+      return;
+    }
+
+    if (currentView === 'monthly') {
+      renderMonthlyView();
+      return;
+    }
+  }
+
+  function renderDailyView(selYmd) {
+    const container = document.getElementById('tableContainer');
+    const selDmy = ymdToDmy(selYmd);
+    let html = standardTableHeader();
+    let found = false;
+
+    Object.entries(tankDB).sort((a,b) => a[0].localeCompare(b[0])).forEach(([serial, records]) => {
+      const r1 = records.find(r => r.round === 1 && r.date === selDmy) || {};
+      const r2 = records.find(r => r.round === 2 && r.date === selDmy) || {};
+      const r3 = records.find(r => r.round === 3 && r.date === selDmy) || {};
+      if (r1.date || r2.date || r3.date) {
+        html += buildStandardRow(serial, r1, r2, r3);
+        found = true;
+      }
+    });
+
+    html += `</tbody></table>`;
+    if (!found) {
+      container.innerHTML = `<div style="padding:24px;text-align:center;color:#666;">📭 ไม่พบข้อมูลการอัดแก๊สในวันที่ ${selDmy}</div>`;
+      return;
+    }
+    container.innerHTML = html;
+  }
+
+  function renderMonthlyView() {
+    const container = document.getElementById('tableContainer');
+    container.innerHTML = `<div style="padding:24px;text-align:center;color:#666;">📈 รายงานประจำเดือน — อยู่ระหว่างพัฒนา</div>`;
   }
 
   function renderAllStandardView() {
     const container = document.getElementById('tableContainer');
-    const allSerials = Object.keys(tankDB).sort();
+    const allSerials = Object.keys(tankDB).sort((a,b) => a.localeCompare(b));
 
     if (!allSerials.length) {
-      container.innerHTML = `<div style="padding:24px;text-align:center;color:#666;">📭 ยังไม่มีข้อมูล — กด "บันทึกข้อมูลใหม่" เพื่อเริ่มใช้งาน</div>`;
+      container.innerHTML = `<div style="padding:24px;text-align:center;color:#666;">📭 ยังไม่มีข้อมูล — กด "สแกน QR" หรือค้นหาเลขถังเพื่อเริ่มบันทึก</div>`;
       return;
     }
 
@@ -506,9 +622,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function showTankForm(serial, roundNum = null) {
     currentSerial = serial;
-    currentView = 'single';
+    currentView = 'alltanks';
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector('[data-view="single"]').classList.add('active');
+    document.querySelector('[data-view="alltanks"]').classList.add('active');
+    setupViewUI('alltanks');
+
+    document.getElementById('serialInput').parentElement.style.display = 'flex';
+    document.getElementById('btnScan').parentElement.style.display = 'flex';
+    document.getElementById('tankCard').classList.remove('hidden');
+    document.getElementById('toggleForm').classList.remove('hidden');
+    document.getElementById('tankActions').classList.remove('hidden');
 
     document.getElementById('fSerial').value = serial;
     const records = tankDB[serial] || [];
@@ -553,9 +676,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     document.getElementById('formCard').classList.remove('hidden');
-    document.getElementById('tankCard').style.display = 'block';
-    document.getElementById('tankActions').classList.remove('hidden');
-    renderTankDetail(serial);
+    renderAllStandardView();
     
     if (!roundNum && records.length >= 3) {
       document.getElementById('formCard').classList.add('hidden');
@@ -574,7 +695,7 @@ document.addEventListener('DOMContentLoaded', function() {
     tankDB[currentSerial].forEach((r, i) => { r.round = i + 1; });
 
     alert("✅ ลบสำเร็จ!");
-    renderTankDetail(currentSerial);
+    renderAllStandardView();
   });
 
   document.getElementById('btnEdit1').addEventListener('click', () => {
@@ -635,11 +756,22 @@ document.addEventListener('DOMContentLoaded', function() {
         ? `✅ แก้ไขข้อมูลครั้งที่ ${rec.round} สำเร็จ!` 
         : `✅ บันทึกครั้งที่ ${rec.round} สำเร็จ!`);
       document.getElementById('formCard').classList.add('hidden');
-      renderTankDetail(rec.serial);
+      renderAllStandardView();
     }
   });
 
   document.getElementById('btnRefresh').addEventListener('click', loadFromSheet);
+  document.getElementById('btnExportCurrent').addEventListener('click', exportCurrentView);
+
+  // ===== ปุ่มแสดงข้อมูลรายวัน =====
+  document.getElementById('btnShowDaily').addEventListener('click', function() {
+    selectedDailyDate = document.getElementById('selDate').value;
+    if (!selectedDailyDate) {
+      alert("⚠️ กรุณาเลือกวันที่ก่อน");
+      return;
+    }
+    renderDailyView(selectedDailyDate);
+  });
 
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', function() {
@@ -661,74 +793,4 @@ document.addEventListener('DOMContentLoaded', function() {
     if (s) { document.getElementById('serialInput').value = s; showTankForm(s); }
   });
 
-  document.getElementById('btnExport').addEventListener('click', function() {
-    const wb = XLSX.utils.book_new();
-    const rows = [["เลขถังแก๊ส",
-      "ครั้งที่ 1","วันที่","น้ำหนักก่อนอัด (กก.)","น้ำหนักหลังอัด (กก.)","น้ำหนักรวมครั้งที่ 1","แรงดันแก๊ส","CH4","CO2","H2S","Gas Meter Start","Gas Meter Finish","รวม Gas Meter/M3",
-      "ครั้งที่ 2","วันที่","น้ำหนักก่อนอัด (กก.)","น้ำหนักหลังอัด (กก.)","น้ำหนักรวมครั้งที่ 2","แรงดันแก๊ส","CH4","CO2","H2S","Gas Meter Start","Gas Meter Finish","รวม Gas Meter/M3",
-      "ครั้งที่ 3","วันที่","น้ำหนักก่อนอัด (กก.)","น้ำหนักหลังอัด (กก.)","น้ำหนักรวมครั้งที่ 3","แรงดันแก๊ส","CH4","CO2","H2S","Gas Meter Start","Gas Meter Finish","รวม Gas Meter/M3",
-      "รวมน้ำหนัก"]];
-    
-    Object.entries(tankDB).forEach(([serial, records]) => {
-      const r1 = records.find(r => r.round === 1) || {};
-      const r2 = records.find(r => r.round === 2) || {};
-      const r3 = records.find(r => r.round === 3) || {};
-      const totalKG = ((parseFloat(r1.weight)||0)+(parseFloat(r2.weight)||0)+(parseFloat(r3.weight)||0)).toFixed(2);
-      rows.push([
-        serial,
-        r1.round||1, r1.date||'', r1.before||'', r1.after||'', r1.weight||'', r1.pressure||'', r1.ch4||'', r1.co2||'', r1.h2s||'', r1.meterStart||'', r1.meterEnd||'', r1.meterTotal||'',
-        r2.round||2, r2.date||'', r2.before||'', r2.after||'', r2.weight||'', r2.pressure||'', r2.ch4||'', r2.co2||'', r2.h2s||'', r2.meterStart||'', r2.meterEnd||'', r2.meterTotal||'',
-        r3.round||3, r3.date||'', r3.before||'', r3.after||'', r3.weight||'', r3.pressure||'', r3.ch4||'', r3.co2||'', r3.h2s||'', r3.meterStart||'', r3.meterEnd||'', r3.meterTotal||'',
-        totalKG
-      ]);
-    });
-
-    const ws = XLSX.utils.aoa_to_sheet(rows);
-    XLSX.utils.book_append_sheet(wb, ws, "ทะเบียนถังแก๊ส");
-    XLSX.writeFile(wb, "ทะเบียนถังแก๊ส_" + toDDMMYYYY(new Date()).replace(/\//g,'-') + ".xlsx");
-  });
-
-  document.getElementById('btnScan').addEventListener('click', async function() {
-    const wrap = document.getElementById('scanWrap');
-    const video = document.getElementById('video');
-    wrap.classList.toggle('hidden');
-    if (!wrap.classList.contains('hidden')) {
-      try {
-        videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-        video.srcObject = videoStream;
-        video.onplay = () => { scanQR(); };
-      } catch {
-        alert("⚠️ เปิดกล้องไม่ได้ — พิมพ์เลขถังเองแทน");
-        wrap.classList.add('hidden');
-      }
-    } else {
-      if (videoStream) videoStream.getTracks().forEach(t => t.stop());
-    }
-  });
-
-  function scanQR() {
-    const video = document.getElementById('video');
-    if (video.readyState < 2) return requestAnimationFrame(scanQR);
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    ctx.drawImage(video, 0, 0);
-    const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const code = jsQR(img.data, img.width, img.height);
-    if (code && code.data) {
-      if (videoStream) videoStream.getTracks().forEach(t => t.stop());
-      document.getElementById('scanWrap').classList.add('hidden');
-      document.getElementById('serialInput').value = code.data.trim();
-      showTankForm(code.data.trim());
-      return;
-    }
-    requestAnimationFrame(scanQR);
-  }
-
-  updateTankCount();
-  checkAPI().then(() => {
-    renderCurrentView();
-  });
-});
-</script>
-</body>
-</html>
+  document.getElementById('btnScan').addEventListener
