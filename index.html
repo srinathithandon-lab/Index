@@ -38,6 +38,8 @@
     .tab-btn { padding: 10px 16px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; background: #ffffff; color: #555; border: 1px solid #ddd; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
     .tab-btn.active { background: #e3f2fd; color: #1976d2; border-color: #90caf9; font-weight: 500; }
     .tab-btn:hover:not(.active) { background: #f5f5f5; border-color: #bbb; }
+    .tab-count { background: #1976d2; color: white; font-size: 12px; padding: 1px 8px; border-radius: 10px; margin-left: 4px; }
+    .tab-btn.active .tab-count { background: #1565c0; }
 
     .tank-card { background: #1976d2; color: white; padding: 20px; border-radius: 10px; margin-bottom: 14px; }
     .tank-serial { font-size: 26px; font-weight: bold; margin-bottom: 6px; }
@@ -109,10 +111,11 @@
 </div>
 
 <div class="view-tabs">
-  <button class="tab-btn active" data-view="single">📋 ข้อมูลถัง</button>
-  <button class="tab-btn" data-view="daily">📅 รายวัน</button>
-  <button class="tab-btn" data-view="monthly">📆 รายเดือน</button>
-  <button class="tab-btn" data-view="all">📊 ทั้งหมด</button>
+  <!-- ✅ ปรับชื่อปุ่มตามที่ต้องการ -->
+  <button class="tab-btn active" data-view="single">📋 เก็บประวัติหมายเลขถัง <span class="tab-count" id="tankCount">0</span></button>
+  <button class="tab-btn" data-view="daily">📊 รายงานประจำวัน</button>
+  <button class="tab-btn" data-view="monthly">📈 รายงานประจำเดือน</button>
+  <button class="tab-btn" data-view="all">📂 ข้อมูลทั้งหมด</button>
 </div>
 
 <div class="tank-card" id="tankCard">
@@ -205,15 +208,20 @@ const PASSWORD_DEL_ROUND1 = "del123";
 const PASSWORD_CLEAR_ALL = "clear999";
 
 let editMode = false;
-let tankDB = {}; // เก็บข้อมูลในหน่วยความจำ
+let tankDB = {};
 let currentSerial = null;
 let currentView = 'single';
 let videoStream = null;
 const canvas = document.createElement('canvas'), ctx = canvas.getContext('2d');
 
-// ⚙️ ลิงก์ Google Apps Script (อาจยังไม่ใช้งานได้จริง จึงมีระบบสำรอง)
 const APPSCRIPT_URL = "https://script.google.com/macros/s/AKfycbyhApPZRt1_HMtEUqkPa0its2izh2kIlljgqTTzZUj-gTmyF6DzWEzeGREAB5x_DPEn/exec";
-let apiAvailable = false; // สถานะการเชื่อมต่อ API
+let apiAvailable = false;
+
+// ===== อัปเดตจำนวนถังทั้งหมด =====
+function updateTankCount() {
+  const count = Object.keys(tankDB).length;
+  document.getElementById('tankCount').textContent = count;
+}
 
 // ===== แปลงวันที่เป็น DD/MM/YYYY =====
 function toDDMMYYYY(date) {
@@ -339,7 +347,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (type === 'err') el.classList.add('err');
   }
 
-  // ===== ทดสอบการเชื่อมต่อ API =====
   async function checkAPI() {
     try {
       const controller = new AbortController();
@@ -362,7 +369,6 @@ document.addEventListener('DOMContentLoaded', function() {
     return false;
   }
 
-  // ===== โหลดข้อมูลจาก API (ถ้าเชื่อมต่อได้) =====
   async function loadFromSheet() {
     const ok = await checkAPI();
     if (!ok) {
@@ -403,6 +409,7 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         }
       }
+      updateTankCount();
       const count = Object.keys(tankDB).length;
       setStatus(`✅ โหลดข้อมูลล่าสุด — ${count} ถัง`, 'ok');
       renderCurrentView();
@@ -412,7 +419,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // ===== บันทึกข้อมูลไป API =====
   async function saveToSheet(rec) {
     if (!apiAvailable) {
       alert("ℹ️ บันทึกสำเร็จในหน้าเว็บ\n⚠️ ยังไม่ได้ส่งขึ้นออนไลน์\n👉 กด 'บันทึกเป็น Excel' เพื่อสำรองข้อมูล");
@@ -557,7 +563,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // ===== 🗑️ ลบประวัติครั้งที่ 1 =====
   document.getElementById('btnDelRound1').addEventListener('click', function() {
     if (!currentSerial) return alert("⚠️ กรุณาค้นหาเลขถังก่อน");
     const pass = prompt("🔑 กรุณาใส่รหัสผ่านเพื่อลบประวัติครั้งที่ 1:");
@@ -572,7 +577,6 @@ document.addEventListener('DOMContentLoaded', function() {
     renderTankDetail(currentSerial);
   });
 
-  // ===== ✏️ แก้ไขแต่ละครั้ง =====
   document.getElementById('btnEdit1').addEventListener('click', () => {
     if (!currentSerial) return alert("⚠️ กรุณาค้นหาเลขถังก่อน");
     showTankForm(currentSerial, 1);
@@ -586,18 +590,17 @@ document.addEventListener('DOMContentLoaded', function() {
     showTankForm(currentSerial, 3);
   });
 
-  // ===== 🗑️ ลบประวัติทั้งหมด =====
   document.getElementById('btnClearAll').addEventListener('click', function() {
     const pass = prompt("🔑 กรุณาใส่รหัสผ่านเพื่อลบประวัติทั้งหมด:");
     if (pass !== PASSWORD_CLEAR_ALL) return alert("❌ รหัสผ่านไม่ถูกต้อง!");
     if (!confirm("⚠️⚠️⚠️ ต้องการลบประวัติทั้งหมดหรือไม่?")) return;
     tankDB = {};
     currentSerial = null;
+    updateTankCount();
     alert("✅ ลบประวัติทั้งหมดสำเร็จ!");
     location.reload();
   });
 
-  // ===== บันทึกข้อมูล =====
   document.getElementById('btnSave').addEventListener('click', async function() {
     const dateVal = parseDateInput(document.getElementById('fDate').value);
     if (!dateVal) return alert("⚠️ รูปแบบวันที่ไม่ถูกต้อง — กรอกเป็น วัน/เดือน/ปี เช่น 09/09/2026");
@@ -624,6 +627,8 @@ document.addEventListener('DOMContentLoaded', function() {
     tankDB[rec.serial] = tankDB[rec.serial].filter(r => !(r.round === rec.round));
     tankDB[rec.serial].push(rec);
 
+    updateTankCount();
+
     const ok = await saveToSheet(rec);
     if (ok) {
       alert(editMode 
@@ -634,7 +639,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // ===== ปุ่มโหลดข้อมูลล่าสุด =====
   document.getElementById('btnRefresh').addEventListener('click', loadFromSheet);
 
   document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -657,7 +661,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (s) { document.getElementById('serialInput').value = s; showTankForm(s); }
   });
 
-  // ===== ส่งออก Excel =====
   document.getElementById('btnExport').addEventListener('click', function() {
     const wb = XLSX.utils.book_new();
     const rows = [["เลขถังแก๊ส",
@@ -685,7 +688,6 @@ document.addEventListener('DOMContentLoaded', function() {
     XLSX.writeFile(wb, "ทะเบียนถังแก๊ส_" + toDDMMYYYY(new Date()).replace(/\//g,'-') + ".xlsx");
   });
 
-  // ===== สแกน QR Code =====
   document.getElementById('btnScan').addEventListener('click', async function() {
     const wrap = document.getElementById('scanWrap');
     const video = document.getElementById('video');
@@ -722,7 +724,7 @@ document.addEventListener('DOMContentLoaded', function() {
     requestAnimationFrame(scanQR);
   }
 
-  // ตรวจสอบการเชื่อมต่อเมื่อเปิดหน้า
+  updateTankCount();
   checkAPI().then(() => {
     renderCurrentView();
   });
