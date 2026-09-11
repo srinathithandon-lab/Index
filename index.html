@@ -1,540 +1,1303 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ทะเบียนถังแก๊ส — Cenergy Solutions</title>
-  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-  <style>
-    * { box-sizing: border-box; font-family: "Segoe UI", sans-serif; margin: 0; padding: 0; }
-    body { background: #f0f4f8; padding: 16px; max-width: 1200px; margin: 0 auto; color: #333; }
-
-    .sync-bar {
-      background: #e8f7ff;
-      padding: 14px 18px;
-      border-radius: 10px;
-      margin-bottom: 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      border: 1px solid #b3e5fc;
-    }
-    .sync-status { font-size: 14px; color: #0277bd; display: flex; align-items: center; gap: 8px; }
-    .sync-status.err { color: #d32f2f; }
-    .sync-status.ok { color: #2e7d32; }
-    .sync-btn { padding: 10px 22px; background: #1976d2; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; }
-    .sync-btn:hover { background: #1565c0; }
-    .btn-export { background: #2e7d32; color: white; }
-    .btn-export:hover { background: #27692a; }
-    .btn-admin { background: #6a1b9a; color: white; }
-    .btn-admin:hover { background: #4a148c; }
-    .btn-danger-all { background: #c62828; color: white; }
-    .btn-danger-all:hover { background: #b71c1c; }
-    .btn-search { background: #ff8f00; color: white; }
-    .btn-search:hover { background: #e68200; }
-    .btn-new { background: #0288d1; color: white; }
-    .btn-new:hover { background: #0277bd; }
-
-    .alert-box { background: #fff3e0; border: 1px solid #ffe0b2; border-radius: 10px; padding: 12px 16px; margin-bottom: 18px; font-size: 14px; line-height: 1.6; color: #e65100; }
-    .mode-indicator { background: #e8f5e9; border: 1px solid #a5d6a7; border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-weight: 500; color: #2e7d32; }
-
-    .top-buttons { display: flex; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
-    .btn-main { padding: 12px 20px; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 500; }
-
-    .admin-bar { background: #f3e5f5; border: 1px solid #ce93d8; border-radius: 10px; padding: 14px 18px; margin-bottom: 18px; }
-    .admin-bar.hidden { display: none; }
-    .admin-title { font-weight: 600; color: #4a148c; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-    .admin-input-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
-    .admin-input { flex: 1; min-width: 200px; padding: 10px 12px; border: 1px solid #ce93d8; border-radius: 6px; font-size: 15px; }
-
-    .view-tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-    .tab-btn { padding: 12px 18px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; background: #fff; color: #555; border: 1px solid #ddd; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
-    .tab-btn.active { background: #e3f2fd; color: #1976d2; border-color: #90caf9; font-weight: 500; }
-    .tab-btn:hover:not(.active) { background: #f5f5f5; border-color: #bbb; }
-    .tab-count { background: #1976d2; color: white; font-size: 13px; padding: 2px 10px; border-radius: 12px; margin-left: 6px; min-width: 28px; text-align: center; }
-    .tab-btn.active .tab-count { background: #1565c0; }
-
-    .summary-bar { background: #e8f5e9; padding: 14px 18px; border-radius: 10px; margin-bottom: 14px; border: 1px solid #c8e6c9; font-size: 15px; }
-    .hidden { display: none !important; }
-
-    .form-card { background: #fafafa; padding: 22px; border-radius: 10px; margin-bottom: 18px; border: 1px solid #e0e0e0; }
-    .form-title { font-size: 16px; font-weight: 600; margin: 14px 0 10px 0; color: #1976d2; border-bottom: 2px solid #1976d2; padding-bottom: 6px; }
-    .form-section { margin-bottom: 18px; border: 1px solid #e0e0e0; border-radius: 8px; padding: 14px; background: #fff; }
-    .form-section-title { font-weight: 600; color: #1565c0; margin-bottom: 12px; font-size: 15px; }
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
-    .form-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 12px; }
-    .form-group { display: flex; flex-direction: column; flex: 1; min-width: 140px; }
-    label { font-size: 13px; color: #555; margin-bottom: 5px; }
-    input { padding: 10px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; background: #fff; }
-    input:focus { outline: none; border-color: #1976d2; box-shadow: 0 0 0 3px rgba(25,118,210,0.1); }
-    input[readonly] { background: #f5f5f5; color: #1565c0; font-weight: 500; }
-    .calc-note { font-size: 12px; color: #1976d2; margin-top: 4px; }
-    .save-btn { width: 100%; background: #1976d2; color: white; border: none; padding: 15px; font-size: 17px; border-radius: 10px; cursor: pointer; margin-top: 10px; font-weight: 500; }
-    .save-btn:hover { background: #1565c0; }
-
-    .filter-bar { background: #fff; padding: 14px 18px; border-radius: 10px; margin-bottom: 18px; border: 1px solid #e0e0e0; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-    .filter-bar label { font-size: 14px; font-weight: 500; color: #333; }
-    .filter-bar input { padding: 10px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; }
-
-    .table-container { overflow-x: auto; border-radius: 10px; border: 1px solid #ccc; background: #fff; margin-top: 10px; }
-    table { width: 100%; border-collapse: collapse; font-size: 11px; white-space: nowrap; }
-    th { background: #1976d2; color: white; padding: 7px 3px; text-align: center; border: 1px solid #1565c0; font-weight: 500; font-size: 10px; }
-    td { padding: 6px 3px; text-align: center; border: 1px solid #e0e0e0; }
-    tr:hover td { background: #f5f9fc; }
-    .serial-cell { font-weight: bold; color: #1565c0; background: #e3f2fd; }
-    .weight-cell { font-weight: bold; color: #e65100; }
-    .total-kg { font-weight: bold; background: #e8f5e9; color: #2e7d32; font-size: 13px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ทะเบียนถังแก๊ส</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root {
+    --steel: #2B5F75;
+    --steel-dark: #1C4353;
+    --gauge: #E8A33D;
+    --gauge-dark: #8A5A17;
+    --paper: #F7F5F0;
+    --ink: #26313A;
+    --ink-soft: #5B6B73;
+    --line: #D8D3C6;
+    --ok: #1D7A4C;
+    --ok-bg: #E3F3E9;
+    --warn-bg: #FCEFDA;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans Thai', 'Sarabun', system-ui, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 20px 16px 60px; }
+  .eyebrow { font-size: 13px; color: var(--ink-soft); letter-spacing: 0.02em; margin: 0 0 2px; }
+  h1 { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 600; margin: 0 0 18px; color: var(--steel-dark); }
+  .scan-card {
+    background: var(--steel);
+    border-radius: 14px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .viewfinder {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: #10262F;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  video { width: 100%; height: 100%; object-fit: cover; display: none; }
+  .corner {
+    position: absolute; width: 26px; height: 26px;
+    border: 3px solid var(--gauge);
+  }
+  .tl { top: 14px; left: 14px; border-right: none; border-bottom: none; }
+  .tr { top: 14px; right: 14px; border-left: none; border-bottom: none; }
+  .bl { bottom: 14px; left: 14px; border-right: none; border-top: none; }
+  .br { bottom: 14px; right: 14px; border-left: none; border-top: none; }
+  .cam-placeholder { color: #7FA0AE; font-family: 'IBM Plex Mono', monospace; font-size: 13px; text-align: center; padding: 0 30px; }
+  .scan-row { display: flex; gap: 8px; margin-top: 12px; }
+  button {
+    font-family: inherit;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .btn-primary { background: var(--gauge); color: #3D2703; padding: 11px 14px; flex: 1; }
+  .btn-primary:active { background: var(--gauge-dark); color: #fff; }
+  .btn-ghost { background: rgba(255,255,255,0.12); color: #EAF2F5; padding: 11px 14px; }
+  .status-line { color: #B8D1DA; font-size: 12px; margin-top: 10px; font-family: 'IBM Plex Mono', monospace; min-height: 16px; }
+  .manual-row { display: flex; gap: 8px; margin-top: 16px; }
+  input[type=text], input[type=number], input[type=date] {
+    font-family: 'IBM Plex Mono', monospace;
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 15px;
+    background: #fff;
+    color: var(--ink);
+    width: 100%;
+  }
+  input:focus { outline: none; border-color: var(--steel); }
+  .find-btn { background: var(--steel); color: #fff; padding: 0 18px; white-space: nowrap; }
+  .upload-label {
+    display: block; text-align: center; margin-top: 10px;
+    font-size: 13px; color: var(--steel); text-decoration: underline;
+    cursor: pointer;
+  }
+  .divider { border: none; border-top: 1px solid var(--line); margin: 26px 0 18px; }
+  .browse-toggle { font-size: 13px; color: var(--ink-soft); background: none; border: none; padding: 0; text-decoration: underline; cursor: pointer; }
+  .tank-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 12px; }
+  .tank-chip {
+    background: #fff; border: 1px solid var(--line); border-radius: 6px;
+    padding: 8px 4px; font-family: 'IBM Plex Mono', monospace; font-size: 13px;
+    text-align: center; color: var(--ink); cursor: pointer;
+  }
+  .tank-chip:active { background: var(--paper); }
+  .result-card {
+    margin-top: 22px; background: #fff; border-radius: 12px;
+    border: 1px solid var(--line); overflow: hidden;
+  }
+  .result-head {
+    background: var(--steel-dark); color: #fff; padding: 14px 16px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .tag-serial { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; }
+  .tag-sub { font-size: 12px; color: #AFC6CE; margin-top: 2px; }
+  .not-found { padding: 16px; font-size: 14px; color: var(--ink-soft); }
+  .history-item {
+    padding: 12px 16px; border-top: 1px solid var(--line);
+  }
+  .history-item:first-child { border-top: none; }
+  .hist-row1 { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+  .hist-round { font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 14px; color: var(--steel-dark); }
+  .hist-date { font-size: 12px; color: var(--ink-soft); }
+  .hist-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px 8px; font-size: 12px; }
+  .metric-label { color: var(--ink-soft); }
+  .metric-val { font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
+  .metric-empty { color: #C6C1B4; }
+  .add-btn {
+    width: 100%; background: var(--ok-bg); color: var(--ok);
+    padding: 12px; margin-top: 12px; font-weight: 600;
+  }
+  .add-form { padding: 14px 16px; background: var(--paper); border-top: 1px solid var(--line); display: none; }
+  .add-form.open { display: block; }
+  .field { margin-bottom: 10px; }
+  .field label { display: block; font-size: 12px; color: var(--ink-soft); margin-bottom: 4px; }
+  .field-row { display: flex; gap: 8px; }
+  .field-row .field { flex: 1; }
+  .save-btn { width: 100%; background: var(--steel); color: #fff; padding: 12px; margin-top: 4px; }
+  .err { color: #B33A3A; font-size: 12px; margin-top: 4px; display: none; }
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--steel-dark); color: #fff; padding: 10px 18px; border-radius: 8px;
+    font-size: 13px; opacity: 0; transition: opacity 0.25s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+</style>
 </head>
 <body>
+<div class="wrap">
 
-<!-- แถบสถานะ -->
-<div class="sync-bar">
-  <span class="sync-status" id="syncStatus">🔄 กำลังตรวจสอบการเชื่อมต่อ...</span>
-  <div style="display:flex; gap:10px;align-items:center;">
-    <button class="sync-btn" id="btnRefresh">🔄 โหลดข้อมูลล่าสุด</button>
-    <button class="sync-btn btn-export" id="btnExportCurrent">📥 ส่งออก Excel</button>
-    <button class="sync-btn btn-admin" id="btnAdmin">🔐 ผู้ดูแลระบบ</button>
-  </div>
-</div>
+  <h1>ทะเบียนถังแก๊ส</h1>
 
-<!-- แถบผู้ดูแลระบบ -->
-<div class="admin-bar hidden" id="adminBar">
-  <div class="admin-title">
-    🔐 แผงควบคุมผู้ดูแลระบบ
-    <button class="sync-btn" style="padding:6px 12px;font-size:13px;background:#757575;" id="btnLogout">ออกจากระบบ</button>
+  <div style="background:#E9F1F5; border:1px solid var(--line); border-radius:8px; padding:10px 12px; margin-bottom:10px; font-size:12px; color:var(--steel-dark); display:flex; align-items:center; gap:6px;">
+    <span>💾</span><span>ทำงานแบบออฟไลน์ — บันทึกทันที (ในเครื่องนี้) แล้วกด "ซิงค์" เมื่อต้องการส่งขึ้น Google Sheets</span>
   </div>
-  <div class="admin-input-row hidden" id="adminPassRow">
-    <input type="password" class="admin-input" id="adminPass" placeholder="🔑 กรอกรหัสผ่านผู้ดูแลระบบ" />
-    <button class="sync-btn btn-admin" id="btnLogin">เข้าสู่ระบบ</button>
-  </div>
-  <div class="hidden" id="adminActions">
-    <p style="color:#2e7d32;margin-bottom:10px;">✅ ยืนยันตัวตนสำเร็จ</p>
-    <button class="btn-main btn-danger-all" id="btnClearAll">🗑️ ลบประวัติการอัดแก๊สทั้งหมด</button>
-  </div>
-</div>
 
-<!-- แถบคำแนะนำ -->
-<div class="alert-box">
-  ℹ️ กรอกเลขถังแล้วกด 🔍 ค้นหาเพื่อแก้ไขข้อมูลเดิม หรือกด ➕ เพิ่มถังใหม่เพื่อบันทึกถังใหม่
-</div>
+  <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
+    <button class="btn-primary" id="loadFromServerBtn" style="flex:1; background:var(--steel); color:#fff; padding:11px 10px;">📥 โหลดจากเซิร์ฟเวอร์</button>
+    <button class="btn-primary" id="syncNowBtn" style="flex:1; background:#1D7A4C; color:#fff; padding:11px 10px;">🔄 ซิงค์ข้อมูลทั้งหมด</button>
+  </div>
 
-<!-- ✅ แถบค้นหา / เพิ่มใหม่ -->
-<div class="form-card">
-  <div class="form-row">
-    <div class="form-group">
-      <label>เลขถังแก๊ส</label>
-      <input type="text" id="fSerial" placeholder="กรอกเลขถังแก๊ส" />
+  <div id="statusBar" style="font-size:12px; color:var(--ink-soft); background:#fff; border:1px solid var(--line); border-radius:8px; padding:8px 12px; margin-bottom:14px;"></div>
+
+  <button class="browse-toggle" id="sheetsSettingsToggle" style="margin-bottom:14px;">ตั้งค่าฐานข้อมูลกลาง (Google Sheets / Excel Online)</button>
+  <div id="sheetsSettingsPanel" style="display:none; margin-bottom:14px; background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px;">
+    <p style="font-size:12px; color:var(--ink-soft); margin:0 0 10px; line-height:1.5;">
+      วาง URL ของ Google Apps Script Web App หรือ Microsoft Power Automate HTTP trigger ที่ตั้งค่าไว้ (ลงท้ายด้วย /exec สำหรับ Google หรือเป็นลิงก์ Power Automate สำหรับ Excel Online)
+      เพื่อใช้กับปุ่ม "โหลดจากเซิร์ฟเวอร์" และ "ซิงค์ข้อมูลทั้งหมด" ด้านบน — ตั้งครั้งเดียวต่อเครื่อง/เบราว์เซอร์ที่ใช้งาน
+    </p>
+    <div class="field">
+      <label>Backend URL (Google Apps Script หรือ Power Automate)</label>
+      <input type="text" id="sheetsUrlInput" placeholder="https://script.google.com/... หรือ https://prod-xx.../workflows/...">
     </div>
-    <button class="sync-btn btn-search" id="btnSearchTank">🔍 ค้นหา</button>
-    <button class="sync-btn btn-new" id="btnNewTank">➕ เพิ่มถังใหม่</button>
+    <div class="err" id="sheetsUrlErr" style="display:none;">เชื่อมต่อไม่สำเร็จ ตรวจสอบ URL และการตั้งค่าอีกครั้ง</div>
+    <div style="display:flex; gap:8px;">
+      <button class="save-btn" id="sheetsUrlSave">บันทึก URL</button>
+      <button class="browse-toggle" id="sheetsUrlClear">เลิกใช้ฐานข้อมูลกลาง</button>
+    </div>
+
+    <hr class="divider" style="margin:18px 0;">
+
+    <p style="font-size:12px; color:var(--ink-soft); margin:0 0 10px; line-height:1.5;">
+      <strong>เพิ่มเติม (ไม่บังคับ):</strong> วาง URL ของ Power Automate flow ที่เชื่อมต่อไฟล์ Excel รูปแบบ pivot (ตาม gas_tank_backend + Office Script) เพื่อให้ไฟล์ Excel นั้นอัปเดตทุกครั้งที่กด "ซิงค์ข้อมูลทั้งหมด"
+    </p>
+    <div class="field">
+      <label>Excel Real-time Sync URL (Power Automate)</label>
+      <input type="text" id="excelSyncUrlInput" placeholder="https://prod-xx.../workflows/...">
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="save-btn" id="excelSyncUrlSave">บันทึก Excel Sync</button>
+      <button class="browse-toggle" id="excelSyncUrlClear">เลิกใช้ Excel Sync</button>
+    </div>
+    <div id="excelSyncStatus" style="font-size:12px; color:var(--ink-soft); margin-top:8px;"></div>
   </div>
 
-  <!-- ✅ แสดงสถานะโหมดทำงาน -->
-  <div class="mode-indicator" id="modeIndicator">📝 โหมด: รอการค้นหาหรือเพิ่มถังใหม่</div>
+  <div class="scan-card">
+    <div class="viewfinder" id="viewfinder">
+      <video id="video" playsinline muted></video>
+      <div class="cam-placeholder" id="camPlaceholder">กดปุ่มด้านล่างเพื่อเปิดกล้อง<br>แล้วส่อง QR บนถังแก๊ส</div>
+      <div class="corner tl"></div>
+      <div class="corner tr"></div>
+      <div class="corner bl"></div>
+      <div class="corner br"></div>
+    </div>
+    <div class="scan-row">
+      <button class="btn-primary" id="camToggle">เปิดกล้องสแกน</button>
+      <button class="btn-ghost" id="uploadTrigger">อัปโหลดรูป</button>
+      <button class="btn-ghost" id="torchBtn" style="display:none;">เปิดไฟฉาย</button>
+    </div>
+    <input type="file" id="fileInput" accept="image/*" style="display:none">
+    <div class="status-line" id="statusLine"></div>
+  </div>
 
-  <!-- ✅ ฟอร์มข้อมูล — แสดงครั้งที่ 1, 2, 3 พร้อมกัน -->
-  <div id="dataForm" class="hidden">
-    
-    <!-- ครั้งที่ 1 -->
-    <div class="form-section">
-      <div class="form-section-title">🔴 ครั้งที่ 1</div>
-      <div class="form-grid">
-        <div class="form-group"><label>วันที่ (DD/MM/YYYY)</label><input type="text" id="r1_date" placeholder="09/09/2026" /></div>
-        <div class="form-group"><label>น้ำหนักก่อนอัด/KG.</label><input type="number" step="0.01" id="r1_before" oninput="calcW1()" /></div>
-        <div class="form-group"><label>น้ำหนักหลังอัด/KG.</label><input type="number" step="0.01" id="r1_after" oninput="calcW1()" /></div>
-        <div class="form-group"><label>น้ำหนัก/KG.</label><input type="text" id="r1_weight" readonly /></div>
-        <div class="form-group"><label>แรงดัน/Bar</label><input type="number" step="0.01" id="r1_press" /></div>
-        <div class="form-group"><label>CH4</label><input type="number" step="0.01" id="r1_ch4" /></div>
-        <div class="form-group"><label>CO2</label><input type="number" step="0.01" id="r1_co2" /></div>
-        <div class="form-group"><label>H2S</label><input type="number" step="0.01" id="r1_h2s" /></div>
-        <div class="form-group"><label>Gas Meter Start</label><input type="number" step="0.01" id="r1_mStart" oninput="calcM1()" /></div>
-        <div class="form-group"><label>Gas Meter Finish</label><input type="number" step="0.01" id="r1_mEnd" oninput="calcM1()" /></div>
-        <div class="form-group"><label>รวม Gas Meter/M3</label><input type="text" id="r1_mTotal" readonly /></div>
+  <div class="manual-row">
+    <input type="text" id="manualSerial" placeholder="หรือกรอกเลขถัง เช่น 2050">
+    <button class="find-btn" id="manualFind">ค้นหา</button>
+  </div>
+
+  <hr class="divider">
+  <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+    <button class="browse-toggle" id="browseToggle">ดูรายการถังทั้งหมด (<span id="tankCountLabel">23</span> ถัง)</button>
+    <button class="browse-toggle" id="exportBtn">ดาวน์โหลด Excel ล่าสุด</button>
+    <button class="browse-toggle" id="addTankToggle">+ เพิ่มเลขถังใหม่</button>
+    <button class="browse-toggle" id="dateViewToggle">ดูข้อมูลรายวัน</button>
+    <button class="browse-toggle" id="monthViewToggle">ดูข้อมูลรายเดือน</button>
+  </div>
+  <div id="recordCount" style="font-size:12px; color:var(--ink-soft); margin-top:6px;"></div>
+  <div class="tank-grid" id="tankGrid" style="display:none;"></div>
+
+  <div id="addTankPanel" style="display:none; margin-top:14px; background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px;">
+    <div class="field">
+      <label>เลขถังใหม่ (เช่น 3200)</label>
+      <input type="text" id="newTankSerial" placeholder="กรอกเลขถัง">
+    </div>
+    <button class="save-btn" id="confirmAddTank">เพิ่มถังนี้ + สร้าง QR</button>
+    <div class="err" id="addTankErr" style="display:none;">กรอกเลขถัง หรือเลขนี้มีอยู่ในระบบแล้ว</div>
+    <div id="newTankQrArea" style="display:none; margin-top:16px; text-align:center;">
+      <div class="tag-serial" style="color:var(--steel-dark); margin-bottom:10px;" id="newTankQrLabel"></div>
+      <div id="qrCanvasHolder" style="display:inline-block; padding:10px; background:#fff; border:1px solid var(--line); border-radius:8px;"></div>
+      <div style="margin-top:10px;">
+        <button class="browse-toggle" id="downloadQrBtn">ดาวน์โหลด QR</button>
       </div>
     </div>
-
-    <!-- ครั้งที่ 2 -->
-    <div class="form-section">
-      <div class="form-section-title">🟡 ครั้งที่ 2</div>
-      <div class="form-grid">
-        <div class="form-group"><label>วันที่ (DD/MM/YYYY)</label><input type="text" id="r2_date" placeholder="09/09/2026" /></div>
-        <div class="form-group"><label>น้ำหนักก่อนอัด/KG.</label><input type="number" step="0.01" id="r2_before" oninput="calcW2()" /></div>
-        <div class="form-group"><label>น้ำหนักหลังอัด/KG.</label><input type="number" step="0.01" id="r2_after" oninput="calcW2()" /></div>
-        <div class="form-group"><label>น้ำหนัก/KG.</label><input type="text" id="r2_weight" readonly /></div>
-        <div class="form-group"><label>แรงดัน/Bar</label><input type="number" step="0.01" id="r2_press" /></div>
-        <div class="form-group"><label>CH4</label><input type="number" step="0.01" id="r2_ch4" /></div>
-        <div class="form-group"><label>CO2</label><input type="number" step="0.01" id="r2_co2" /></div>
-        <div class="form-group"><label>H2S</label><input type="number" step="0.01" id="r2_h2s" /></div>
-        <div class="form-group"><label>Gas Meter Start</label><input type="number" step="0.01" id="r2_mStart" oninput="calcM2()" /></div>
-        <div class="form-group"><label>Gas Meter Finish</label><input type="number" step="0.01" id="r2_mEnd" oninput="calcM2()" /></div>
-        <div class="form-group"><label>รวม Gas Meter/M3</label><input type="text" id="r2_mTotal" readonly /></div>
-      </div>
-    </div>
-
-    <!-- ครั้งที่ 3 -->
-    <div class="form-section">
-      <div class="form-section-title">🟢 ครั้งที่ 3</div>
-      <div class="form-grid">
-        <div class="form-group"><label>วันที่ (DD/MM/YYYY)</label><input type="text" id="r3_date" placeholder="09/09/2026" /></div>
-        <div class="form-group"><label>น้ำหนักก่อนอัด/KG.</label><input type="number" step="0.01" id="r3_before" oninput="calcW3()" /></div>
-        <div class="form-group"><label>น้ำหนักหลังอัด/KG.</label><input type="number" step="0.01" id="r3_after" oninput="calcW3()" /></div>
-        <div class="form-group"><label>น้ำหนัก/KG.</label><input type="text" id="r3_weight" readonly /></div>
-        <div class="form-group"><label>แรงดัน/Bar</label><input type="number" step="0.01" id="r3_press" /></div>
-        <div class="form-group"><label>CH4</label><input type="number" step="0.01" id="r3_ch4" /></div>
-        <div class="form-group"><label>CO2</label><input type="number" step="0.01" id="r3_co2" /></div>
-        <div class="form-group"><label>H2S</label><input type="number" step="0.01" id="r3_h2s" /></div>
-        <div class="form-group"><label>Gas Meter Start</label><input type="number" step="0.01" id="r3_mStart" oninput="calcM3()" /></div>
-        <div class="form-group"><label>Gas Meter Finish</label><input type="number" step="0.01" id="r3_mEnd" oninput="calcM3()" /></div>
-        <div class="form-group"><label>รวม Gas Meter/M3</label><input type="text" id="r3_mTotal" readonly /></div>
-      </div>
-    </div>
-
-    <button class="save-btn" id="btnSave">✅ บันทึกข้อมูลทั้งหมด (หรือกด Enter)</button>
   </div>
+
+  <div id="dateViewPanel" style="display:none; margin-top:14px; background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px;">
+    <div class="field-row">
+      <div class="field"><label>เลือกวันที่</label><input type="date" id="dateViewInput"></div>
+    </div>
+    <button class="save-btn" id="dateViewSearch">แสดงข้อมูลวันนี้</button>
+    <div id="dateViewResult" style="margin-top:14px;"></div>
+  </div>
+
+  <div id="monthViewPanel" style="display:none; margin-top:14px; background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px;">
+    <div class="field-row">
+      <div class="field"><label>เลือกเดือน</label><input type="month" id="monthViewInput"></div>
+    </div>
+    <button class="save-btn" id="monthViewSearch">แสดงข้อมูลเดือนนี้</button>
+    <div id="monthViewResult" style="margin-top:14px;"></div>
+  </div>
+
+  <div id="resultArea"></div>
+
+  <hr class="divider">
+  <button class="browse-toggle" id="resetAllToggle" style="color:#B33A3A;">ลบประวัติการอัดทั้งหมด</button>
+  <div id="resetPanel" style="display:none; margin-top:10px; background:#FDEDED; border:1px solid #F0B4B4; border-radius:10px; padding:14px;">
+    <p style="font-size:13px; color:#B33A3A; margin:0 0 10px; line-height:1.5;" id="resetWarningText"></p>
+    <div class="field">
+      <label style="color:#B33A3A;">รหัสผ่านผู้ดูแลระบบ</label>
+      <input type="password" id="resetPassword" placeholder="กรอกรหัสผ่าน" autocomplete="off">
+    </div>
+    <div class="err" id="resetPasswordErr" style="display:none;">รหัสผ่านไม่ถูกต้อง</div>
+    <div style="display:flex; gap:8px; margin-top:10px;">
+      <button class="browse-toggle" id="resetCancel">ยกเลิก</button>
+      <button class="save-btn" id="resetConfirm" style="background:#B33A3A;">ยืนยันลบทั้งหมด</button>
+    </div>
+  </div>
+
 </div>
+<div class="toast" id="toast"></div>
 
-<!-- ปุ่มสลับรายงาน -->
-<div class="view-tabs">
-  <button class="tab-btn" data-view="alltanks">📋 รายงานหมายเลขถังทั้งหมด <span class="tab-count" id="tabAllCount">0</span></button>
-  <button class="tab-btn" data-view="daily">📊 รายงานประจำวัน <span class="tab-count" id="tabDailyCount">0</span></button>
-  <button class="tab-btn" data-view="monthly">📈 รายงานประจำเดือน <span class="tab-count" id="tabMonthlyCount">0</span></button>
-  <button class="tab-btn active" data-view="all">📂 ข้อมูลถังทั้งหมด <span class="tab-count" id="tabTotalCount">0</span></button>
-</div>
+<canvas id="canvas" style="display:none;"></canvas>
 
-<!-- ตัวกรองวันที่ -->
-<div class="filter-bar hidden" id="dailyFilter">
-  <label>📅 เลือกวันที่:</label>
-  <input type="date" id="selDate" />
-  <button class="sync-btn" id="btnShowDaily">🔍 แสดงข้อมูล</button>
-</div>
-
-<div class="filter-bar hidden" id="monthlyFilter">
-  <label>📅 เลือกเดือน/ปี:</label>
-  <input type="month" id="selMonth" />
-  <button class="sync-btn" id="btnShowMonthly">🔍 แสดงข้อมูล</button>
-</div>
-
-<div class="summary-bar hidden" id="summaryBar">
-  📋 ช่วง: <strong id="periodLabel">ทั้งหมด</strong> &nbsp;|&nbsp;
-  🛢️ จำนวนถังที่บันทึก: <strong id="tankCountPeriod">0</strong> ถัง
-</div>
-
-<div class="table-container" id="tableContainer"></div>
-
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
-// ✅ ลิงก์ใหม่ — ใช้งานได้แล้วครับ
-const APPSCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_xJW5KEXSA0k2wiVioWaW9sKRCzwkextjjH3WfhVYcpXSD7BjSABTfhPA2jLuCcmZ/exec";
+const SEED_SET1 = ["2050","1126","3068","2102","2155","3165","2059","3054","2138","3118","3030","3129","3013"];
+const SEED_SET2 = ["1172","1105","1183","1108","1085","1006","1148","2011","2002","1067"];
+const CH4_CO2_H2S = {
+  "2050": {ch4:64.63, co2:14.95, h2s:1},
+  "1126": {ch4:65.06, co2:16.29, h2s:1},
+  "3068": {ch4:66.66, co2:17.47, h2s:1}
+};
+const SEED_PRESSURE_BEFORE_AFTER = {
+  "2050": [37.62,38.68,37.53], "1126":[38.06,39.24,36.34], "3068":[37.88,39.10,37.92],
+  "2102":[38.58,39.06,37.75], "2155":[37.70,39.12,37.86], "3165":[38.12,39.36,37.95],
+  "2059":[38.08,39.32,37.59], "3054":[38.54,39.56,37.68], "2138":[38.16,39.42,36.52],
+  "3118":[37.80,39.08,37.68], "3030":[38.25,39.10,38.12], "3129":[37.48,39.00,37.77],
+  "3013":[38.80,39.92,37.82],
+  "1172":[36.72,37.28,23.24], "1105":[37.28,37.84,24.64], "1183":[36.68,37.30,24.20],
+  "1108":[37.18,37.80,24.86], "1085":[39.18,39.78,24.78], "1006":[37.80,38.38,24.83],
+  "1148":[37.52,38.04,24.85], "2011":[37.32,37.84,24.83], "2002":[37.88,38.46,24.82],
+  "1067":[37.46,38.04,24.86]
+};
+const ALL_TANKS = [...SEED_SET1, ...SEED_SET2];
+const ADMIN_PASSWORD = "1717"; // เปลี่ยนรหัสผ่านตรงนี้ได้เลย
 
-const ADMIN_PASSWORD = "admin123!";
-const CLEARALL_PASSWORD = "clear999";
+let currentSerial = null;
+let stream = null;
+let scanning = false;
+const memoryStore = {}; // last-resort fallback only if localStorage itself is unavailable
+let usingMemoryFallback = false;
 
-let tankDB = {};
-let currentView = 'all';
-let selectedDailyDate = null;
-let selectedMonth = null;
-let isAdmin = false;
-let CURRENT_SERIAL = null;
+const DEFAULT_SHEETS_API_URL = "https://script.google.com/macros/s/AKfycbyCJ6lZquGFLYRnaMNces5HaNNUFK2-GdQNqyOG3hRvw_D5sbuEdyKrU2UzcAbBurw/exec";
+let SHEETS_API_URL = (function () {
+  try {
+    const saved = localStorage.getItem('sheets_api_url');
+    return (saved !== null) ? saved : DEFAULT_SHEETS_API_URL;
+  } catch (e) { return DEFAULT_SHEETS_API_URL; }
+})();
 
-// ===== คำนวณอัตโนมัติ แต่ละครั้ง =====
-window.calcW1 = () => { const b=parseFloat(document.getElementById('r1_before').value)||0,a=parseFloat(document.getElementById('r1_after').value)||0; document.getElementById('r1_weight').value=(a-b).toFixed(2); };
-window.calcW2 = () => { const b=parseFloat(document.getElementById('r2_before').value)||0,a=parseFloat(document.getElementById('r2_after').value)||0; document.getElementById('r2_weight').value=(a-b).toFixed(2); };
-window.calcW3 = () => { const b=parseFloat(document.getElementById('r3_before').value)||0,a=parseFloat(document.getElementById('r3_after').value)||0; document.getElementById('r3_weight').value=(a-b).toFixed(2); };
-window.calcM1 = () => { const s=parseFloat(document.getElementById('r1_mStart').value)||0,e=parseFloat(document.getElementById('r1_mEnd').value)||0; document.getElementById('r1_mTotal').value=(e-s).toFixed(2); };
-window.calcM2 = () => { const s=parseFloat(document.getElementById('r2_mStart').value)||0,e=parseFloat(document.getElementById('r2_mEnd').value)||0; document.getElementById('r2_mTotal').value=(e-s).toFixed(2); };
-window.calcM3 = () => { const s=parseFloat(document.getElementById('r3_mStart').value)||0,e=parseFloat(document.getElementById('r3_mEnd').value)||0; document.getElementById('r3_mTotal').value=(e-s).toFixed(2); };
+let EXCEL_SYNC_URL = (function () {
+  try { return localStorage.getItem('excel_sync_url') || ''; } catch (e) { return ''; }
+})();
 
-// ===== แปลงวันที่ =====
-function toDDMMYYYY(d) { if(!d)return""; const dt=d.includes('T')?new Date(d):new Date(d); return isNaN(dt.getTime())?"":`${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`; }
-function ymdToDmy(s) { return s?s.replace(/^(\d{4})-(\d{2})-(\d{2})$/,'$3/$2/$1'):""; }
-function parseDateInput(val) { if(!val)return null; const m=String(val).trim().match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/); if(m){const dt=new Date(parseInt(m[3]),parseInt(m[2])-1,parseInt(m[1]));if(!isNaN(dt.getTime()))return toDDMMYYYY(dt);} return null; }
-
-// ===== อัปเดตจำนวน =====
-function updateCounts() {
-  const total=Object.keys(tankDB).length;
-  document.getElementById('tabAllCount').textContent=total;
-  document.getElementById('tabTotalCount').textContent=total;
-  if(selectedDailyDate){const dt=ymdToDmy(selectedDailyDate); document.getElementById('tabDailyCount').textContent=Object.values(tankDB).filter(r=>r.some(x=>x.date===dt)).length;}
-  else document.getElementById('tabDailyCount').textContent='0';
-  if(selectedMonth){const [y,m]=selectedMonth.split('-'); document.getElementById('tabMonthlyCount').textContent=Object.values(tankDB).filter(r=>r.some(x=>x.date.endsWith(`${m}/${y}`))).length;}
-  else document.getElementById('tabMonthlyCount').textContent='0';
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
 }
 
-function setStatus(txt,type='info'){const el=document.getElementById('syncStatus');el.textContent=txt;el.className='sync-status';if(type==='ok')el.classList.add('ok');if(type==='err')el.classList.add('err');}
+// ---- Local-first storage: every normal read/write in the app goes straight to
+// localStorage so the app works instantly offline. Google Sheets is only touched
+// explicitly via "โหลดจากเซิร์ฟเวอร์" (pull) and "ซิงค์ข้อมูลทั้งหมด" (push). ----
 
-// ===== โหลดข้อมูล =====
-async function loadData(){
-  if(!APPSCRIPT_URL||APPSCRIPT_URL.includes('วางลิงก์')){setStatus("⚠️ ยังไม่ได้ตั้งค่าลิงก์ Apps Script",'err');return;}
-  try{
-    setStatus("🔄 กำลังเชื่อมต่อ Google Sheets...");
-    const res=await fetch(APPSCRIPT_URL,{signal:AbortSignal.timeout(30000)});
-    setStatus("📥 กำลังอ่านข้อมูล...");
-    if(!res.ok)throw new Error("ไม่ตอบสนอง");
-    const result=await res.json();
-    if(!result.success)throw new Error(result.error||"โหลดข้อมูลไม่สำเร็จ");
-    tankDB={}; const data=result.data||[];
-    setStatus("📋 กำลังประมวลผล...");
-    for(let i=1;i<data.length;i++){
-      const row=data[i],s=String(row[0]||"").trim();if(!s)continue;
-      tankDB[s]=[];
-      for(let r=1;r<=3;r++){
-        const o=(r-1)*11+1;
-        if(row[o]){
-          tankDB[s].push({serial:s,round:r,date:row[o],before:row[o+1],after:row[o+2],weight:row[o+3],pressure:row[o+4],ch4:row[o+5],co2:row[o+6],h2s:row[o+7],meterStart:row[o+8],meterEnd:row[o+9],meterTotal:row[o+10]});
-        }
-      }
+function localRawGet(key) {
+  if (usingMemoryFallback) return Object.prototype.hasOwnProperty.call(memoryStore, key) ? memoryStore[key] : null;
+  try { return localStorage.getItem(key); } catch (e) { return null; }
+}
+function localRawSet(key, value) {
+  if (!usingMemoryFallback) {
+    try { localStorage.setItem(key, value); return true; } catch (e) { usingMemoryFallback = true; }
+  }
+  memoryStore[key] = value;
+  return true;
+}
+function localRawDelete(key) {
+  if (!usingMemoryFallback) {
+    try { localStorage.removeItem(key); return; } catch (e) { usingMemoryFallback = true; }
+  }
+  delete memoryStore[key];
+}
+function localRawListKeys(prefix) {
+  if (usingMemoryFallback) return Object.keys(memoryStore).filter(k => k.startsWith(prefix));
+  try {
+    const keys = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith(prefix)) keys.push(k);
     }
-    setStatus(`✅ ซิงค์สำเร็จ — ${Object.keys(tankDB).length} ถัง`,'ok');
-    updateCounts();renderTable();
-  }catch(e){console.error(e);
-    if(e.name==="TimeoutError")setStatus("⏱️ เชื่อมต่อช้า — กด โหลดข้อมูลอีกครั้ง",'err');
-    else setStatus("⚠️ โหลดไม่ได้ — "+e.message,'err');
+    return keys;
+  } catch (e) { return []; }
+}
+
+function getPendingSet() {
+  try { return new Set(JSON.parse(localRawGet('meta:pending_sync') || '[]')); } catch (e) { return new Set(); }
+}
+function savePendingSet(set) {
+  localRawSet('meta:pending_sync', JSON.stringify([...set]));
+}
+function markPending(key) {
+  const s = getPendingSet();
+  s.add(key);
+  savePendingSet(s);
+  updateStatusBar();
+}
+function clearPending(key) {
+  const s = getPendingSet();
+  s.delete(key);
+  savePendingSet(s);
+  updateStatusBar();
+}
+
+async function storageGet(key) {
+  return localRawGet(key);
+}
+
+async function storageSet(key, value) {
+  localRawSet(key, value);
+  if (key.startsWith('tank:')) markPending(key);
+  return { key, value };
+}
+
+async function storageDelete(key) {
+  localRawDelete(key);
+  clearPending(key);
+  return { key, deleted: true };
+}
+
+async function storageListKeys(prefix) {
+  return localRawListKeys(prefix);
+}
+
+async function updateStatusBar() {
+  const keys = await storageListKeys('tank:');
+  const pending = getPendingSet();
+  const el = document.getElementById('statusBar');
+  if (el) {
+    el.textContent = `ช่วง: ทั้งหมด  |  จำนวนถังที่บันทึก: ${keys.length} ถัง  |  รอซิงค์: ${pending.size} รายการ`;
   }
 }
 
-// ===== ✅ เพิ่มถังใหม่ — ล้างฟอร์ม เปิดฟอร์ม =====
-function newTank(){
-  CURRENT_SERIAL = null;
-  document.getElementById('fSerial').value="";
-  document.getElementById('modeIndicator').textContent="📝 โหมด: ✅ เพิ่มถังใหม่ — กรอกข้อมูลครั้งที่ 1 (ครั้งที่ 2,3 เว้นว่างได้)";
-  document.getElementById('dataForm').classList.remove('hidden');
-  clearAllForm();
-  document.getElementById('fSerial').focus();
+async function remoteCall(params) {
+  const qs = new URLSearchParams({ ...params, _t: Date.now() }).toString();
+  const res = await fetch(`${SHEETS_API_URL}?${qs}`, { method: 'GET', cache: 'no-store' });
+  if (!res.ok) throw new Error('Remote backend failed: ' + res.status);
+  return await res.json();
 }
 
-// ===== ✅ ค้นหาถัง — แสดงข้อมูลครบทุกครั้ง =====
-function searchTank(){
-  const serial=document.getElementById('fSerial').value.trim();
-  if(!serial)return alert("⚠️ กรุณากรอกเลขถังแก๊ส");
-  CURRENT_SERIAL = serial;
+async function sheetsGet(key) {
+  const data = await remoteCall({ action: 'get', key });
+  return (data && data.value != null) ? data.value : null;
+}
 
-  if(!tankDB[serial]){
-    alert(`ℹ️ ไม่พบข้อมูลถัง ${serial} — เปิดฟอร์มเพื่อบันทึกข้อมูลใหม่`);
-    document.getElementById('modeIndicator').textContent=`📝 โหมด: ✅ เพิ่มข้อมูลถังใหม่ เลขที่ ${serial}`;
-    document.getElementById('dataForm').classList.remove('hidden');
-    clearAllForm();
+async function sheetsSet(key, value) {
+  return await remoteCall({ action: 'set', key, value });
+}
+
+async function sheetsDelete(key) {
+  return await remoteCall({ action: 'delete', key });
+}
+
+async function sheetsList(prefix) {
+  const data = await remoteCall({ action: 'list', prefix });
+  return (data && data.keys) ? data.keys : [];
+}
+
+async function syncToExcel(serial, records) {
+  if (!EXCEL_SYNC_URL) return;
+  try {
+    const res = await fetch(EXCEL_SYNC_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ serial: String(serial), records: JSON.stringify(records) })
+    });
+    const status = document.getElementById('excelSyncStatus');
+    if (status) {
+      status.textContent = res.ok
+        ? 'ซิงก์ Excel ล่าสุด: สำเร็จ (' + new Date().toLocaleTimeString('th-TH') + ')'
+        : 'ซิงก์ Excel ล่าสุด: ล้มเหลว (' + res.status + ')';
+    }
+  } catch (e) {
+    const status = document.getElementById('excelSyncStatus');
+    if (status) status.textContent = 'ซิงก์ Excel ล่าสุด: เชื่อมต่อไม่ได้ (' + (e.message || 'unknown') + ')';
+    // Never throw — Excel sync is best-effort and must not affect the primary save.
+  }
+}
+
+async function syncPendingToServer() {
+  if (!SHEETS_API_URL) {
+    toast('ยังไม่ได้ตั้งค่า Google Sheets ก่อนครับ');
+    return;
+  }
+  const pending = [...getPendingSet()];
+  if (pending.length === 0) {
+    toast('ไม่มีข้อมูลที่ต้องซิงค์');
+    return;
+  }
+  toast(`กำลังซิงค์ ${pending.length} รายการ...`);
+  let success = 0, fail = 0;
+  for (const key of pending) {
+    const value = localRawGet(key);
+    try {
+      await sheetsSet(key, value ?? '');
+      clearPending(key);
+      success++;
+      if (key.startsWith('tank:') && EXCEL_SYNC_URL) {
+        const serial = key.replace('tank:', '');
+        let records = [];
+        try { records = JSON.parse(value || '[]'); } catch (e) {}
+        syncToExcel(serial, records);
+      }
+    } catch (e) {
+      fail++;
+    }
+  }
+  await updateStatusBar();
+  toast(`ซิงค์สำเร็จ ${success} รายการ` + (fail > 0 ? ` · ล้มเหลว ${fail} รายการ` : ''));
+}
+
+async function loadFromServer() {
+  if (!SHEETS_API_URL) {
+    toast('ยังไม่ได้ตั้งค่า Google Sheets ก่อนครับ');
+    return;
+  }
+  const pending = getPendingSet();
+  if (pending.size > 0) {
+    const proceed = confirm(`มีข้อมูล ${pending.size} รายการที่ยังไม่ได้ซิงค์ขึ้นเซิร์ฟเวอร์ การโหลดตอนนี้อาจเขียนทับข้อมูลที่ยังไม่ซิงค์ ต้องการดำเนินการต่อหรือไม่?`);
+    if (!proceed) return;
+  }
+  toast('กำลังโหลดจากเซิร์ฟเวอร์...');
+  try {
+    const keys = await sheetsList('tank:');
+    for (const key of keys) {
+      const val = await sheetsGet(key);
+      if (val != null) localRawSet(key, val);
+    }
+    savePendingSet(new Set());
+    toast(`โหลดข้อมูล ${keys.length} ถังจากเซิร์ฟเวอร์แล้ว`);
+    await buildTankGrid();
+    await updateRecordCount();
+    await updateStatusBar();
+  } catch (e) {
+    toast('โหลดจากเซิร์ฟเวอร์ไม่สำเร็จ: ' + (e && e.message ? e.message : 'unknown'));
+  }
+}
+
+async function ensureSeeded() {
+  const seededFlag = await storageGet('meta:seeded');
+  if (seededFlag) return;
+  for (const serial of ALL_TANKS) {
+    const [before, after, pressure] = SEED_PRESSURE_BEFORE_AFTER[serial];
+    const extra = CH4_CO2_H2S[serial] || {};
+    const record = {
+      round: 2,
+      date: "2026-08-31",
+      before, after, pressure,
+      ch4: extra.ch4 ?? null,
+      co2: extra.co2 ?? null,
+      h2s: extra.h2s ?? null
+    };
+    try {
+      await storageSet('tank:' + serial, JSON.stringify([record]));
+    } catch (e) {}
+  }
+  await storageSet('meta:seeded', '1');
+}
+
+async function updateRecordCount() {
+  const keys = await storageListKeys('tank:');
+  let total = 0;
+  for (const key of keys) {
+    try {
+      const val = await storageGet(key);
+      if (val) total += (JSON.parse(val) || []).length;
+    } catch (e) {}
+  }
+  document.getElementById('recordCount').textContent =
+    `บันทึกไว้ทั้งหมด ${total} รายการ จาก ${keys.length} ถัง — กดดาวน์โหลด Excel เพื่อดึงข้อมูลนี้`;
+  return total;
+}
+
+async function buildTankGrid() {
+  const grid = document.getElementById('tankGrid');
+  grid.innerHTML = '';
+  const keys = await storageListKeys('tank:');
+  const serials = keys.map(k => k.replace('tank:', ''));
+  const merged = Array.from(new Set([...ALL_TANKS, ...serials]));
+  merged.sort((a, b) => (Number(a) || 0) - (Number(b) || 0));
+  const countLabel = document.getElementById('tankCountLabel');
+  if (countLabel) countLabel.textContent = merged.length;
+  merged.forEach(serial => {
+    const chip = document.createElement('div');
+    chip.className = 'tank-chip';
+    chip.textContent = serial;
+    chip.addEventListener('click', () => lookupTank(serial));
+    grid.appendChild(chip);
+  });
+}
+
+document.getElementById('browseToggle').addEventListener('click', () => {
+  const grid = document.getElementById('tankGrid');
+  const open = grid.style.display !== 'none';
+  grid.style.display = open ? 'none' : 'grid';
+});
+
+document.getElementById('loadFromServerBtn').addEventListener('click', loadFromServer);
+document.getElementById('syncNowBtn').addEventListener('click', syncPendingToServer);
+
+document.getElementById('sheetsSettingsToggle').addEventListener('click', () => {
+  const panel = document.getElementById('sheetsSettingsPanel');
+  const opening = panel.style.display === 'none';
+  if (opening) {
+    document.getElementById('sheetsUrlInput').value = SHEETS_API_URL;
+    document.getElementById('excelSyncUrlInput').value = EXCEL_SYNC_URL;
+    document.getElementById('excelSyncStatus').textContent = EXCEL_SYNC_URL ? 'ตั้งค่าไว้แล้ว' : '';
+  }
+  panel.style.display = opening ? 'block' : 'none';
+});
+
+document.getElementById('sheetsUrlSave').addEventListener('click', async () => {
+  const input = document.getElementById('sheetsUrlInput');
+  const errEl = document.getElementById('sheetsUrlErr');
+  const url = input.value.trim();
+  const btn = document.getElementById('sheetsUrlSave');
+  if (!url) {
+    errEl.textContent = 'วาง URL ก่อนครับ';
+    errEl.style.display = 'block';
+    return;
+  }
+  btn.textContent = 'กำลังทดสอบ...';
+  btn.disabled = true;
+  const previousUrl = SHEETS_API_URL;
+  SHEETS_API_URL = url;
+  try {
+    await sheetsSet('__probe__', '1');
+    await sheetsDelete('__probe__');
+    try { localStorage.setItem('sheets_api_url', url); } catch (e) {}
+    errEl.style.display = 'none';
+    toast('เชื่อมต่อ Google Sheets สำเร็จ — ใช้ปุ่ม "โหลดจากเซิร์ฟเวอร์" หรือ "ซิงค์" ได้แล้ว');
+    document.getElementById('sheetsSettingsPanel').style.display = 'none';
+  } catch (e) {
+    SHEETS_API_URL = previousUrl;
+    errEl.textContent = 'เชื่อมต่อไม่สำเร็จ: ' + (e && e.message ? e.message : 'ตรวจสอบ URL และการตั้งค่า Deploy อีกครั้ง');
+    errEl.style.display = 'block';
+  } finally {
+    btn.textContent = 'บันทึก URL';
+    btn.disabled = false;
+  }
+});
+
+document.getElementById('sheetsUrlClear').addEventListener('click', async () => {
+  SHEETS_API_URL = '';
+  try { localStorage.setItem('sheets_api_url', ''); } catch (e) {}
+  document.getElementById('sheetsUrlInput').value = '';
+  document.getElementById('sheetsUrlErr').style.display = 'none';
+  toast('เลิกใช้ฐานข้อมูลกลางแล้ว — ข้อมูลยังอยู่ในเครื่องนี้ตามปกติ');
+});
+
+document.getElementById('excelSyncUrlSave').addEventListener('click', () => {
+  const url = document.getElementById('excelSyncUrlInput').value.trim();
+  if (!url) {
+    toast('วาง URL ก่อนครับ');
+    return;
+  }
+  EXCEL_SYNC_URL = url;
+  try { localStorage.setItem('excel_sync_url', url); } catch (e) {}
+  document.getElementById('excelSyncStatus').textContent = 'ตั้งค่าแล้ว — จะซิงก์ทุกครั้งที่บันทึกข้อมูลถัง';
+  toast('บันทึก Excel Sync URL แล้ว');
+});
+
+document.getElementById('excelSyncUrlClear').addEventListener('click', () => {
+  EXCEL_SYNC_URL = '';
+  try { localStorage.setItem('excel_sync_url', ''); } catch (e) {}
+  document.getElementById('excelSyncUrlInput').value = '';
+  document.getElementById('excelSyncStatus').textContent = 'เลิกใช้ Excel Sync แล้ว';
+  toast('เลิกใช้ Excel Sync แล้ว');
+});
+
+document.getElementById('addTankToggle').addEventListener('click', () => {
+  const panel = document.getElementById('addTankPanel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+});
+
+document.getElementById('dateViewToggle').addEventListener('click', () => {
+  const panel = document.getElementById('dateViewPanel');
+  const opening = panel.style.display === 'none';
+  panel.style.display = opening ? 'block' : 'none';
+  if (opening) {
+    const dateInput = document.getElementById('dateViewInput');
+    if (!dateInput.value) dateInput.value = new Date().toISOString().slice(0, 10);
+    panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+});
+
+document.getElementById('dateViewSearch').addEventListener('click', async () => {
+  const dateStr = document.getElementById('dateViewInput').value;
+  const resultEl = document.getElementById('dateViewResult');
+  if (!dateStr) {
+    resultEl.innerHTML = '<div class="not-found">เลือกวันที่ก่อนครับ</div>';
+    return;
+  }
+  resultEl.innerHTML = '<div class="not-found">กำลังค้นหา...</div>';
+
+  const keys = await storageListKeys('tank:');
+  const matches = [];
+  for (const key of keys) {
+    const serial = key.replace('tank:', '');
+    let records = [];
+    try {
+      const val = await storageGet(key);
+      if (val) records = JSON.parse(val);
+    } catch (e) {}
+    records.forEach(r => {
+      if (r.date === dateStr) matches.push({ serial, ...r });
+    });
+  }
+  matches.sort((a, b) => (Number(a.serial) || 0) - (Number(b.serial) || 0) || (a.round || 0) - (b.round || 0));
+
+  if (matches.length === 0) {
+    resultEl.innerHTML = `<div class="not-found">ไม่มีข้อมูลการอัดในวันที่ ${dateStr}</div>`;
     return;
   }
 
-  const records = tankDB[serial];
-  fillFormData(records);
-  document.getElementById('modeIndicator').textContent=`📝 โหมด: ✅ แก้ไขข้อมูลถัง ${serial} — แสดงครั้งที่ 1, 2, 3`;
-  document.getElementById('dataForm').classList.remove('hidden');
-  alert(`✅ พบข้อมูลถัง ${serial} — แสดงข้อมูลครบทั้ง 3 ครั้ง`);
-}
+  let totalWeight = 0;
+  const rowsHtml = matches.map(m => {
+    if (m.before != null && m.after != null) totalWeight += (m.after - m.before);
+    return `
+      <div class="history-item">
+        <div class="hist-row1">
+          <span class="hist-round">#${m.serial} · ครั้งที่ ${fmt(m.round)}</span>
+        </div>
+        <div class="hist-metrics">
+          <div><span class="metric-label">ก่อนอัด </span><span class="metric-val">${fmt(m.before)}</span></div>
+          <div><span class="metric-label">หลังอัด </span><span class="metric-val">${fmt(m.after)}</span></div>
+          <div><span class="metric-label">แรงดัน </span><span class="metric-val">${fmt(m.pressure)}</span></div>
+          <div><span class="metric-label">CH4 </span><span class="metric-val">${fmt(m.ch4)}</span></div>
+          <div><span class="metric-label">CO2 </span><span class="metric-val">${fmt(m.co2)}</span></div>
+          <div><span class="metric-label">H2S </span><span class="metric-val">${fmt(m.h2s)}</span></div>
+        </div>
+      </div>
+    `;
+  }).join('');
 
-// ===== ✅ ล้างฟอร์มทั้งหมด =====
-function clearAllForm(){
-  ['r1_date','r1_before','r1_after','r1_weight','r1_press','r1_ch4','r1_co2','r1_h2s','r1_mStart','r1_mEnd','r1_mTotal',
-   'r2_date','r2_before','r2_after','r2_weight','r2_press','r2_ch4','r2_co2','r2_h2s','r2_mStart','r2_mEnd','r2_mTotal',
-   'r3_date','r3_before','r3_after','r3_weight','r3_press','r3_ch4','r3_co2','r3_h2s','r3_mStart','r3_mEnd','r3_mTotal'
-  ].forEach(id=>document.getElementById(id).value="");
-}
+  resultEl.innerHTML = `
+    <div class="result-card">
+      <div class="result-head">
+        <div>
+          <div class="tag-serial">${dateStr}</div>
+          <div class="tag-sub">${matches.length} ครั้ง จาก ${new Set(matches.map(m => m.serial)).size} ถัง · น้ำหนักรวม ${totalWeight.toFixed(2)} กก.</div>
+        </div>
+      </div>
+      ${rowsHtml}
+    </div>
+  `;
+});
 
-// ===== ✅ เติมข้อมูลลงฟอร์ม แยกตามครั้ง =====
-function fillFormData(records){
-  clearAllForm();
-  const r1=records.find(x=>x.round===1)||{};
-  const r2=records.find(x=>x.round===2)||{};
-  const r3=records.find(x=>x.round===3)||{};
+document.getElementById('monthViewToggle').addEventListener('click', () => {
+  const panel = document.getElementById('monthViewPanel');
+  const opening = panel.style.display === 'none';
+  panel.style.display = opening ? 'block' : 'none';
+  if (opening) {
+    const monthInput = document.getElementById('monthViewInput');
+    if (!monthInput.value) monthInput.value = new Date().toISOString().slice(0, 7);
+    panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+});
 
-  if(r1.date){
-    document.getElementById('r1_date').value=r1.date||"";
-    document.getElementById('r1_before').value=r1.before||"";
-    document.getElementById('r1_after').value=r1.after||"";
-    document.getElementById('r1_weight').value=r1.weight||"";
-    document.getElementById('r1_press').value=r1.pressure||"";
-    document.getElementById('r1_ch4').value=r1.ch4||"";
-    document.getElementById('r1_co2').value=r1.co2||"";
-    document.getElementById('r1_h2s').value=r1.h2s||"";
-    document.getElementById('r1_mStart').value=r1.meterStart||"";
-    document.getElementById('r1_mEnd').value=r1.meterEnd||"";
-    document.getElementById('r1_mTotal').value=r1.meterTotal||"";
+document.getElementById('monthViewSearch').addEventListener('click', async () => {
+  const monthStr = document.getElementById('monthViewInput').value; // "YYYY-MM"
+  const resultEl = document.getElementById('monthViewResult');
+  if (!monthStr) {
+    resultEl.innerHTML = '<div class="not-found">เลือกเดือนก่อนครับ</div>';
+    return;
+  }
+  resultEl.innerHTML = '<div class="not-found">กำลังค้นหา...</div>';
+
+  const keys = await storageListKeys('tank:');
+  const matches = [];
+  for (const key of keys) {
+    const serial = key.replace('tank:', '');
+    let records = [];
+    try {
+      const val = await storageGet(key);
+      if (val) records = JSON.parse(val);
+    } catch (e) {}
+    records.forEach(r => {
+      if (typeof r.date === 'string' && r.date.startsWith(monthStr)) matches.push({ serial, ...r });
+    });
+  }
+  matches.sort((a, b) => (a.date || '').localeCompare(b.date || '') || (Number(a.serial) || 0) - (Number(b.serial) || 0));
+
+  if (matches.length === 0) {
+    resultEl.innerHTML = `<div class="not-found">ไม่มีข้อมูลการอัดในเดือน ${monthStr}</div>`;
+    return;
   }
 
-  if(r2.date){
-    document.getElementById('r2_date').value=r2.date||"";
-    document.getElementById('r2_before').value=r2.before||"";
-    document.getElementById('r2_after').value=r2.after||"";
-    document.getElementById('r2_weight').value=r2.weight||"";
-    document.getElementById('r2_press').value=r2.pressure||"";
-    document.getElementById('r2_ch4').value=r2.ch4||"";
-    document.getElementById('r2_co2').value=r2.co2||"";
-    document.getElementById('r2_h2s').value=r2.h2s||"";
-    document.getElementById('r2_mStart').value=r2.meterStart||"";
-    document.getElementById('r2_mEnd').value=r2.meterEnd||"";
-    document.getElementById('r2_mTotal').value=r2.meterTotal||"";
+  let totalWeight = 0;
+  const byDay = {};
+  matches.forEach(m => {
+    const net = (m.before != null && m.after != null) ? (m.after - m.before) : 0;
+    totalWeight += net;
+    byDay[m.date] = byDay[m.date] || { count: 0, weight: 0 };
+    byDay[m.date].count += 1;
+    byDay[m.date].weight += net;
+  });
+
+  const dayRows = Object.keys(byDay).sort().map(date => `
+    <div class="history-item">
+      <div class="hist-row1">
+        <span class="hist-round">${date}</span>
+        <span class="hist-date">${byDay[date].count} ครั้ง · ${byDay[date].weight.toFixed(2)} กก.</span>
+      </div>
+    </div>
+  `).join('');
+
+  resultEl.innerHTML = `
+    <div class="result-card">
+      <div class="result-head">
+        <div>
+          <div class="tag-serial">${monthStr}</div>
+          <div class="tag-sub">${matches.length} ครั้ง จาก ${new Set(matches.map(m => m.serial)).size} ถัง · น้ำหนักรวม ${totalWeight.toFixed(2)} กก.</div>
+        </div>
+      </div>
+      ${dayRows}
+    </div>
+  `;
+});
+
+document.getElementById('confirmAddTank').addEventListener('click', async () => {
+  const input = document.getElementById('newTankSerial');
+  const serial = sanitizeSerial(input.value);
+  const errEl = document.getElementById('addTankErr');
+  const qrArea = document.getElementById('newTankQrArea');
+  if (!serial) {
+    errEl.textContent = 'กรอกเลขถังก่อน';
+    errEl.style.display = 'block';
+    qrArea.style.display = 'none';
+    return;
   }
-
-  if(r3.date){
-    document.getElementById('r3_date').value=r3.date||"";
-    document.getElementById('r3_before').value=r3.before||"";
-    document.getElementById('r3_after').value=r3.after||"";
-    document.getElementById('r3_weight').value=r3.weight||"";
-    document.getElementById('r3_press').value=r3.pressure||"";
-    document.getElementById('r3_ch4').value=r3.ch4||"";
-    document.getElementById('r3_co2').value=r3.co2||"";
-    document.getElementById('r3_h2s').value=r3.h2s||"";
-    document.getElementById('r3_mStart').value=r3.meterStart||"";
-    document.getElementById('r3_mEnd').value=r3.meterEnd||"";
-    document.getElementById('r3_mTotal').value=r3.meterTotal||"";
+  const existing = await storageGet('tank:' + serial);
+  if (existing !== null) {
+    errEl.textContent = 'เลขถังนี้มีอยู่ในระบบแล้ว';
+    errEl.style.display = 'block';
+    qrArea.style.display = 'none';
+    return;
   }
-}
+  errEl.style.display = 'none';
+  await storageSet('tank:' + serial, JSON.stringify([]));
+  toast('เพิ่มถัง #' + serial + ' เข้าระบบแล้ว');
+  await buildTankGrid();
+  await updateRecordCount();
 
-// ===== ✅ บันทึกข้อมูลทั้งหมด 3 ครั้ง =====
-async function saveRec(){
-  const serial = (CURRENT_SERIAL || document.getElementById('fSerial').value.trim());
-  if(!serial) return alert("⚠️ กรุณากรอกเลขถังแก๊ส");
+  document.getElementById('newTankQrLabel').textContent = '#' + serial;
+  const holder = document.getElementById('qrCanvasHolder');
+  holder.innerHTML = '';
+  new QRCode(holder, {
+    text: serial,
+    width: 180,
+    height: 180,
+    correctLevel: QRCode.CorrectLevel.M
+  });
+  qrArea.style.display = 'block';
 
-  const roundsData = [];
-  for(let r=1; r<=3; r++){
-    const d=document.getElementById(`r${r}_date`).value.trim();
-    if(d){
-      roundsData.push({
-        serial:serial,
-        round:r,
-        date: parseDateInput(d) || d,
-        before: document.getElementById(`r${r}_before`).value,
-        after: document.getElementById(`r${r}_after`).value,
-        weight: document.getElementById(`r${r}_weight`).value,
-        pressure: document.getElementById(`r${r}_press`).value,
-        ch4: document.getElementById(`r${r}_ch4`).value,
-        co2: document.getElementById(`r${r}_co2`).value,
-        h2s: document.getElementById(`r${r}_h2s`).value,
-        meterStart: document.getElementById(`r${r}_mStart`).value,
-        meterEnd: document.getElementById(`r${r}_mEnd`).value,
-        meterTotal: document.getElementById(`r${r}_mTotal`).value
-      });
-    }
+  document.getElementById('downloadQrBtn').onclick = () => {
+    const img = holder.querySelector('img');
+    const canvasEl = holder.querySelector('canvas');
+    const dataUrl = img ? img.src : (canvasEl ? canvasEl.toDataURL('image/png') : null);
+    if (!dataUrl) return;
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = 'QR_ถัง_' + serial + '.png';
+    a.click();
+  };
+
+  input.value = '';
+});
+
+document.getElementById('resetAllToggle').addEventListener('click', () => {
+  const sharedNote = ' ข้อมูลนี้จะถูกลบในเครื่องนี้ก่อน แล้วจะลบออกจาก Google Sheets ด้วยเมื่อกด "ซิงค์ข้อมูลทั้งหมด" ครั้งถัดไป';
+  document.getElementById('resetWarningText').textContent =
+    'การลบนี้จะลบประวัติการอัดแก๊สทุกครั้งของทุกถังออกอย่างถาวร แต่จะเก็บ "เลขถังแก๊ส" ที่ลงทะเบียนไว้ทั้งหมด ไม่สามารถกู้คืนประวัติได้' + sharedNote + ' ต้องการดำเนินการต่อหรือไม่?';
+  document.getElementById('resetPassword').value = '';
+  document.getElementById('resetPasswordErr').style.display = 'none';
+  document.getElementById('resetPanel').style.display = 'block';
+  document.getElementById('resetPanel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+
+document.getElementById('resetCancel').addEventListener('click', () => {
+  document.getElementById('resetPanel').style.display = 'none';
+  document.getElementById('resetPassword').value = '';
+  document.getElementById('resetPasswordErr').style.display = 'none';
+});
+
+document.getElementById('resetConfirm').addEventListener('click', async () => {
+  const pwdInput = document.getElementById('resetPassword');
+  const pwdErr = document.getElementById('resetPasswordErr');
+  if (pwdInput.value !== ADMIN_PASSWORD) {
+    pwdErr.style.display = 'block';
+    return;
   }
-
-  if(roundsData.length===0) return alert("⚠️ กรุณากรอกข้อมูลอย่างน้อย 1 ครั้ง");
-
+  pwdErr.style.display = 'none';
+  const btn = document.getElementById('resetConfirm');
+  btn.textContent = 'กำลังลบ...';
+  btn.disabled = true;
   try {
-    setStatus(`⏳ กำลังบันทึก ${roundsData.length} ครั้ง...`);
-    let successCount=0, failCount=0;
-
-    for(const rec of roundsData){
-      const res=await fetch(APPSCRIPT_URL,{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify(rec)
-      });
-      if(res.ok){
-        const result=await res.json();
-        if(result.success) successCount++;
-        else failCount++;
-      } else failCount++;
+    const keys = await storageListKeys('tank:');
+    for (const key of keys) {
+      await storageSet(key, JSON.stringify([]));
     }
+    await storageSet('meta:seeded', '1');
+    document.getElementById('resetPanel').style.display = 'none';
+    pwdInput.value = '';
+    document.getElementById('resultArea').innerHTML = '';
+    await buildTankGrid();
+    await updateRecordCount();
+    toast('ลบประวัติการอัดทั้งหมดแล้ว (เลขถังยังอยู่ครบ)');
+  } catch (e) {
+    toast('ลบไม่สำเร็จ: ' + (e && e.message ? e.message : 'ไม่ทราบสาเหตุ'));
+  } finally {
+    btn.textContent = 'ยืนยันลบทั้งหมด';
+    btn.disabled = false;
+  }
+});
 
-    if(failCount===0){
-      alert(`✅ บันทึกสำเร็จทั้งหมด ${successCount} ครั้ง!`);
-      document.getElementById('fSerial').value="";
-      document.getElementById('dataForm').classList.add('hidden');
-      document.getElementById('modeIndicator').textContent="📝 โหมด: รอการค้นหาหรือเพิ่มถังใหม่";
-      CURRENT_SERIAL=null;
-      setStatus("✅ บันทึกสำเร็จ",'ok');
-      loadData();
+function sanitizeSerial(raw) {
+  return String(raw).trim().replace(/[\s\/\\'"]+/g, '');
+}
+
+async function lookupTank(serial) {
+  serial = sanitizeSerial(serial);
+  if (!serial) return;
+  currentSerial = serial;
+  window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
+  let records = [];
+  try {
+    const val = await storageGet('tank:' + serial);
+    if (val) records = JSON.parse(val);
+  } catch (e) {}
+  renderResult(serial, records);
+}
+
+function fmt(v) {
+  if (v === null || v === undefined || v === '') return '<span class="metric-empty">—</span>';
+  return v;
+}
+
+function renderResult(serial, records) {
+  const area = document.getElementById('resultArea');
+  records = (records || []).slice().sort((a,b) => (a.round||0) - (b.round||0));
+
+  let historyHtml = '';
+  let totalWeight = 0;
+  if (records.length === 0) {
+    historyHtml = '<div class="not-found">ยังไม่มีประวัติการอัดของถังนี้</div>';
+  } else {
+    let running = 0;
+    historyHtml = records.map(r => {
+      const net = (r.before != null && r.after != null) ? (r.after - r.before) : null;
+      if (net != null) running += net;
+      return `
+      <div class="history-item">
+        <div class="hist-row1">
+          <span class="hist-round">ครั้งที่ ${fmt(r.round)}</span>
+          <span class="hist-date">${fmt(r.date)}</span>
+        </div>
+        <div class="hist-metrics">
+          <div><span class="metric-label">ก่อนอัด </span><span class="metric-val">${fmt(r.before)}</span></div>
+          <div><span class="metric-label">หลังอัด </span><span class="metric-val">${fmt(r.after)}</span></div>
+          <div><span class="metric-label">น้ำหนักอัด </span><span class="metric-val">${net != null ? net.toFixed(2) + ' กก.' : fmt(null)}</span></div>
+          <div><span class="metric-label">แรงดัน </span><span class="metric-val">${fmt(r.pressure)}</span></div>
+          <div><span class="metric-label">CH4 </span><span class="metric-val">${fmt(r.ch4)}</span></div>
+          <div><span class="metric-label">CO2 </span><span class="metric-val">${fmt(r.co2)}</span></div>
+          <div><span class="metric-label">H2S </span><span class="metric-val">${fmt(r.h2s)}</span></div>
+          <div><span class="metric-label">มิเตอร์เริ่ม </span><span class="metric-val">${fmt(r.meterStart)}</span></div>
+          <div><span class="metric-label">มิเตอร์สิ้นสุด </span><span class="metric-val">${fmt(r.meterFinish)}</span></div>
+          <div><span class="metric-label">สะสมถึงครั้งนี้ </span><span class="metric-val">${running.toFixed(2)} กก.</span></div>
+        </div>
+      </div>
+    `;
+    }).join('');
+    totalWeight = running;
+  }
+
+  const nextRound = records.length > 0 ? Math.max(...records.map(r => r.round||0)) + 1 : 1;
+  const today = new Date().toISOString().slice(0,10);
+
+  area.innerHTML = `
+    <div class="result-card">
+      <div class="result-head">
+        <div>
+          <div class="tag-serial">#${serial}</div>
+          <div class="tag-sub">ประวัติการอัด ${records.length} ครั้ง · น้ำหนักแก๊สอัดรวม ${totalWeight.toFixed(2)} กก.</div>
+        </div>
+      </div>
+      <div>${historyHtml}</div>
+      <div style="padding:0 16px 14px;">
+        <button class="add-btn" id="toggleAddForm">+ บันทึกการอัดครั้งใหม่</button>
+      </div>
+      <div class="add-form" id="addForm">
+        <div class="field-row">
+          <div class="field"><label>วันที่</label><input type="date" id="f_date" value="${today}"></div>
+          <div class="field"><label>ครั้งที่</label><input type="number" id="f_round" value="${nextRound}"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>น้ำหนักก่อนอัด (กก.)</label><input type="number" step="0.01" id="f_before"></div>
+          <div class="field"><label>น้ำหนักหลังอัด (กก.)</label><input type="number" step="0.01" id="f_after"></div>
+        </div>
+        <div class="field">
+          <label>น้ำหนัก/KG (อัตโนมัติ)</label>
+          <input type="text" id="f_autoWeight" readonly placeholder="อัตโนมัติ" style="background:#F2F0E9; color:var(--ink-soft);">
+        </div>
+        <div class="field"><label>แรงดันแก๊ส</label><input type="number" step="0.01" id="f_pressure"></div>
+        <div class="field-row">
+          <div class="field"><label>CH4</label><input type="number" step="0.01" id="f_ch4"></div>
+          <div class="field"><label>CO2</label><input type="number" step="0.01" id="f_co2"></div>
+          <div class="field"><label>H2S</label><input type="number" step="0.01" id="f_h2s"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Gas Meter Start</label><input type="number" step="0.01" id="f_meterStart"></div>
+          <div class="field"><label>Gas Meter Finish</label><input type="number" step="0.01" id="f_meterFinish"></div>
+        </div>
+        <div class="err" id="formErr">กรอกน้ำหนักก่อนและหลังอัดก่อนบันทึก</div>
+        <button class="save-btn" id="saveRecord">บันทึก</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('toggleAddForm').addEventListener('click', () => {
+    document.getElementById('addForm').classList.toggle('open');
+  });
+
+  const updateAutoWeight = () => {
+    const b = parseFloat(document.getElementById('f_before').value);
+    const a = parseFloat(document.getElementById('f_after').value);
+    const out = document.getElementById('f_autoWeight');
+    out.value = (!isNaN(b) && !isNaN(a)) ? (a - b).toFixed(2) + ' กก.' : '';
+  };
+  document.getElementById('f_before').addEventListener('input', updateAutoWeight);
+  document.getElementById('f_after').addEventListener('input', updateAutoWeight);
+
+  document.getElementById('saveRecord').addEventListener('click', async () => {
+    const before = document.getElementById('f_before').value;
+    const after = document.getElementById('f_after').value;
+    const errEl = document.getElementById('formErr');
+    if (!before || !after) {
+      errEl.style.display = 'block';
+      return;
+    }
+    errEl.style.display = 'none';
+    const meterStartVal = document.getElementById('f_meterStart').value;
+    const meterFinishVal = document.getElementById('f_meterFinish').value;
+    const newRecord = {
+      round: Number(document.getElementById('f_round').value) || nextRound,
+      date: document.getElementById('f_date').value || today,
+      before: Number(before),
+      after: Number(after),
+      pressure: document.getElementById('f_pressure').value ? Number(document.getElementById('f_pressure').value) : null,
+      ch4: document.getElementById('f_ch4').value ? Number(document.getElementById('f_ch4').value) : null,
+      co2: document.getElementById('f_co2').value ? Number(document.getElementById('f_co2').value) : null,
+      h2s: document.getElementById('f_h2s').value ? Number(document.getElementById('f_h2s').value) : null,
+      meterStart: meterStartVal ? Number(meterStartVal) : null,
+      meterFinish: meterFinishVal ? Number(meterFinishVal) : null
+    };
+    records.push(newRecord);
+    try {
+      await storageSet('tank:' + serial, JSON.stringify(records));
+      toast('บันทึกข้อมูลถัง #' + serial + ' แล้ว');
+      renderResult(serial, records);
+      await buildTankGrid();
+      await updateRecordCount();
+      syncToExcel(serial, records); // best-effort, does not block or throw
+    } catch (e) {
+      toast('บันทึกไม่สำเร็จ: ' + (e && e.message ? e.message : 'ไม่ทราบสาเหตุ'));
+    }
+  });
+}
+
+async function exportToExcel(silent) {
+  const keys = await storageListKeys('tank:');
+  const tankData = [];
+  for (const key of keys) {
+    const serial = key.replace('tank:', '');
+    let records = [];
+    try {
+      const val = await storageGet(key);
+      if (val) records = JSON.parse(val);
+    } catch (e) {}
+    records = records.slice().sort((a, b) => (a.round || 0) - (b.round || 0));
+    tankData.push({ serial, records });
+  }
+  tankData.sort((a, b) => (Number(a.serial) || 0) - (Number(b.serial) || 0));
+
+  const subHeaders = ["ครั้งที่", "วันที่", "น้ำหนักก่อนอัด (กก.)", "น้ำหนักหลังอัด (กก.)", "น้ำหนักรวม/KG",
+    "แรงดันแก๊ส", "CH4", "CO2", "H2S", "Gas Meter Start", "Gas Meter Finish", "รวม Gas Meter/M3"];
+  const blockWidth = subHeaders.length;
+  const maxRounds = Math.max(1, ...tankData.map(t => t.records.length));
+
+  const headerRow1 = ["เลขถังแก๊ส"];
+  const headerRow2 = [""];
+  for (let r = 1; r <= maxRounds; r++) {
+    headerRow1.push("ครั้งที่ " + r, ...Array(blockWidth - 1).fill(""));
+    headerRow2.push(...subHeaders);
+  }
+  headerRow1.push("น้ำหนักรวมทุกครั้ง (กก.)");
+  headerRow2.push("");
+
+  const aoa = [headerRow1, headerRow2];
+  const merges = [{ s: { r: 0, c: 0 }, e: { r: 1, c: 0 } }];
+  let mcol = 1;
+  for (let r = 1; r <= maxRounds; r++) {
+    merges.push({ s: { r: 0, c: mcol }, e: { r: 0, c: mcol + blockWidth - 1 } });
+    mcol += blockWidth;
+  }
+  merges.push({ s: { r: 0, c: mcol }, e: { r: 1, c: mcol } });
+
+  tankData.forEach(t => {
+    const row = [Number(t.serial) || t.serial];
+    let totalWeight = 0;
+    for (let r = 0; r < maxRounds; r++) {
+      const rec = t.records[r];
+      if (rec) {
+        const meterTotal = (rec.meterStart != null && rec.meterFinish != null)
+          ? Number((rec.meterFinish - rec.meterStart).toFixed(2)) : '';
+        row.push(
+          rec.round ?? (r + 1),
+          rec.date ?? '',
+          rec.before ?? '',
+          rec.after ?? '',
+          (rec.before != null && rec.after != null) ? Number((rec.after - rec.before).toFixed(2)) : '',
+          rec.pressure ?? '',
+          rec.ch4 ?? '',
+          rec.co2 ?? '',
+          rec.h2s ?? '',
+          rec.meterStart ?? '',
+          rec.meterFinish ?? '',
+          meterTotal
+        );
+        if (rec.before != null && rec.after != null) totalWeight += (rec.after - rec.before);
+      } else {
+        for (let i = 0; i < blockWidth; i++) row.push('');
+      }
+    }
+    row.push(Number(totalWeight.toFixed(2)));
+    aoa.push(row);
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!merges'] = merges;
+  const cols = [{ wch: 12 }];
+  for (let r = 0; r < maxRounds; r++) {
+    cols.push({ wch: 7 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 11 }, { wch: 10 }, { wch: 7 }, { wch: 7 }, { wch: 6 }, { wch: 13 }, { wch: 13 }, { wch: 12 });
+  }
+  cols.push({ wch: 16 });
+  ws['!cols'] = cols;
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "ประวัติการอัดแก๊ส");
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  const stamp = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+  const fileName = "ทะเบียนถังแก๊ส_" + stamp + ".xlsx";
+  XLSX.writeFile(wb, fileName);
+  if (!silent) toast('ดาวน์โหลดไฟล์ Excel แล้ว');
+}
+
+document.getElementById('exportBtn').addEventListener('click', () => exportToExcel(false));
+
+document.getElementById('manualFind').addEventListener('click', () => {
+  const val = document.getElementById('manualSerial').value;
+  if (val.trim()) lookupTank(val);
+});
+document.getElementById('manualSerial').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('manualFind').click();
+});
+
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d', { willReadFrequently: true });
+const statusLine = document.getElementById('statusLine');
+const camToggle = document.getElementById('camToggle');
+const camPlaceholder = document.getElementById('camPlaceholder');
+let torchOn = false;
+let torchTrack = null;
+
+async function startCamera() {
+  if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+    statusLine.textContent = 'หน้านี้ไม่ได้เปิดผ่าน https กล้องจะใช้ไม่ได้ — ใช้ปุ่มอัปโหลดรูปหรือกรอกเลขถังแทน';
+    return;
+  }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    statusLine.textContent = 'เบราว์เซอร์นี้ไม่รองรับกล้อง (มักเกิดถ้าเปิดผ่านแอปแชทอย่าง LINE/Facebook) — ลองเปิดลิงก์นี้ใน Safari หรือ Chrome โดยตรง หรือใช้ปุ่มอัปโหลดรูป/กรอกเลขถังแทน';
+    return;
+  }
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: 'environment',
+        width: { ideal: 1920 },
+        height: { ideal: 1080 }
+      }
+    });
+    const track = stream.getVideoTracks()[0];
+    torchTrack = track;
+    try {
+      await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] });
+    } catch (e) {}
+    const caps = (track.getCapabilities && track.getCapabilities()) || {};
+    document.getElementById('torchBtn').style.display = caps.torch ? 'inline-block' : 'none';
+
+    video.srcObject = stream;
+    video.style.display = 'block';
+    camPlaceholder.style.display = 'none';
+    await video.play();
+    camToggle.textContent = 'ปิดกล้อง';
+    scanning = true;
+    statusLine.textContent = 'ให้ QR อยู่กลางกรอบ ห่างประมาณ 10-15 ซม. หลีกเลี่ยงแสงสะท้อน';
+    requestAnimationFrame(scanFrame);
+  } catch (e) {
+    let msg = 'เปิดกล้องไม่ได้ ลองอัปโหลดรูปหรือกรอกเลขถังแทน';
+    if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
+      msg = 'ไม่ได้รับสิทธิ์ใช้กล้อง — เข้าไปอนุญาตกล้องให้เว็บนี้ในตั้งค่าเบราว์เซอร์ แล้วลองใหม่ หรือใช้ปุ่มอัปโหลดรูป/กรอกเลขถังแทน';
+    } else if (e.name === 'NotFoundError' || e.name === 'DevicesNotFoundError') {
+      msg = 'ไม่พบกล้องในอุปกรณ์นี้ — ใช้ปุ่มอัปโหลดรูปหรือกรอกเลขถังแทน';
+    } else if (e.name === 'NotReadableError' || e.name === 'TrackStartError') {
+      msg = 'กล้องถูกใช้งานโดยแอปอื่นอยู่ ปิดแอปกล้อง/แอปอื่นแล้วลองใหม่ หรือใช้ปุ่มอัปโหลดรูปแทน';
+    } else if (e.name === 'SecurityError') {
+      msg = 'หน้านี้ถูกเปิดในกรอบที่ไม่อนุญาตให้ใช้กล้อง (เช่น พรีวิวในแอปแชท) — เปิดลิงก์นี้ในเบราว์เซอร์โดยตรงแทน หรือใช้ปุ่มอัปโหลดรูป/กรอกเลขถัง';
+    }
+    statusLine.textContent = msg;
+  }
+}
+
+function stopCamera() {
+  scanning = false;
+  if (stream) {
+    stream.getTracks().forEach(t => t.stop());
+    stream = null;
+  }
+  torchOn = false;
+  torchTrack = null;
+  document.getElementById('torchBtn').style.display = 'none';
+  document.getElementById('torchBtn').textContent = 'เปิดไฟฉาย';
+  video.style.display = 'none';
+  camPlaceholder.style.display = 'block';
+  camToggle.textContent = 'เปิดกล้องสแกน';
+  statusLine.textContent = '';
+}
+
+async function toggleTorch() {
+  if (!torchTrack) return;
+  torchOn = !torchOn;
+  try {
+    await torchTrack.applyConstraints({ advanced: [{ torch: torchOn }] });
+    document.getElementById('torchBtn').textContent = torchOn ? 'ปิดไฟฉาย' : 'เปิดไฟฉาย';
+  } catch (e) {
+    torchOn = !torchOn;
+  }
+}
+
+function scanFrame() {
+  if (!scanning) return;
+  try {
+    if (typeof jsQR !== 'function') {
+      statusLine.textContent = 'โหลดตัวอ่าน QR ไม่สำเร็จ (เช็คอินเทอร์เน็ต) ลองรีเฟรชหน้าใหม่ หรือใช้ปุ่มอัปโหลดรูป/กรอกเลขถังแทน';
+      stopCamera();
+      return;
+    }
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+      const vw = video.videoWidth, vh = video.videoHeight;
+      if (vw && vh) {
+        // Crop to the visible center square (matches what the viewfinder shows via object-fit: cover)
+        const side = Math.min(vw, vh);
+        const sx = (vw - side) / 2;
+        const sy = (vh - side) / 2;
+        canvas.width = side;
+        canvas.height = side;
+        ctx.drawImage(video, sx, sy, side, side, 0, 0, side, side);
+        const imageData = ctx.getImageData(0, 0, side, side);
+        const code = jsQR(imageData.data, side, side, { inversionAttempts: 'attemptBoth' });
+        if (code && code.data) {
+          statusLine.textContent = 'พบ QR: ' + code.data;
+          stopCamera();
+          lookupTank(code.data);
+          return;
+        }
+      }
+    }
+  } catch (e) {
+    // Swallow per-frame decode errors so a single bad frame never silently stops scanning
+  }
+  requestAnimationFrame(scanFrame);
+}
+
+camToggle.addEventListener('click', () => {
+  if (scanning) stopCamera();
+  else startCamera();
+});
+document.getElementById('torchBtn').addEventListener('click', toggleTorch);
+
+document.getElementById('uploadTrigger').addEventListener('click', () => {
+  document.getElementById('fileInput').click();
+});
+
+document.getElementById('fileInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const img = new Image();
+  img.onload = () => {
+    canvas.width = img.width;
+    canvas.height = img.height;
+    ctx.drawImage(img, 0, 0);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const code = jsQR(imageData.data, imageData.width, imageData.height);
+    if (code && code.data) {
+      statusLine.textContent = 'พบ QR: ' + code.data;
+      lookupTank(code.data);
     } else {
-      alert(`⚠️ บันทึกสำเร็จ ${successCount} ครั้ง ไม่สำเร็จ ${failCount} ครั้ง`);
-      setStatus("⚠️ บันทึกบางรายการไม่สำเร็จ",'err');
+      statusLine.textContent = 'ไม่พบ QR ในรูปนี้ ลองรูปอื่นหรือกรอกเลขถัง';
     }
-  } catch(err){
-    console.error(err);
-    alert("❌ ผิดพลาด: "+err.message);
-    setStatus("❌ "+err.message,'err');
-  }
+  };
+  img.src = URL.createObjectURL(file);
+});
+
+async function initApp() {
+  await ensureSeeded();
+  await buildTankGrid();
+  await updateRecordCount();
+  await updateStatusBar();
 }
 
-// ===== ลบข้อมูลทั้งหมด =====
-async function clearAllData(){
-  const pass=prompt("⚠️ กรุณากรอกรหัสยืนยันเพื่อลบข้อมูลทั้งหมด:");
-  if(pass!==CLEARALL_PASSWORD)return alert("❌ รหัสผ่านไม่ถูกต้อง");
-  if(!confirm("⚠️ คุณแน่ใจหรือไม่ที่จะลบประวัติการอัดแก๊สทั้งหมด? การกระทำนี้ไม่สามารถกู้คืนได้!"))return;
-  try{
-    setStatus("🗑️ กำลังลบข้อมูล...");
-    const res=await fetch(APPSCRIPT_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"CLEAR_ALL",password:CLEARALL_PASSWORD})});
-    const result=await res.json();
-    if(result.success){alert("✅ ลบข้อมูลทั้งหมดสำเร็จ!");tankDB={};renderTable();updateCounts();setStatus("✅ ลบข้อมูลเรียบร้อย",'ok');}
-    else alert("❌ ไม่สำเร็จ: "+(result.error||"รหัสผ่านไม่ถูกต้อง"));
-  }catch{alert("❌ ไม่สามารถลบข้อมูลได้");}
-}
-
-function showHint(txt){document.getElementById('tableContainer').innerHTML=`<div style="padding:40px;text-align:center;color:#666;">📭 ${txt}</div>`;}
-
-// ===== แสดงตาราง =====
-function renderTable(){
-  let filter=()=>true, label="ทั้งหมด";
-  document.getElementById('dailyFilter').classList.add('hidden');
-  document.getElementById('monthlyFilter').classList.add('hidden');
-  document.getElementById('summaryBar').classList.add('hidden');
-  if(currentView==='daily'){
-    document.getElementById('dailyFilter').classList.remove('hidden');
-    if(!selectedDailyDate)return showHint("เลือกวันที่แล้วกด แสดงข้อมูล");
-    const dt=ymdToDmy(selectedDailyDate);
-    filter=r=>r.date===dt; label=`วันที่ ${dt}`;
-  }
-  if(currentView==='monthly'){
-    document.getElementById('monthlyFilter').classList.remove('hidden');
-    if(!selectedMonth)return showHint("เลือกเดือน/ปีแล้วกด แสดงข้อมูล");
-    const [y,m]=selectedMonth.split('-'); label=`เดือน ${m}/${y}`;
-    filter=r=>r.date.endsWith(`${m}/${y}`);
-  }
-  const list=Object.entries(tankDB).sort((a,b)=>a[0].localeCompare(b[0])).map(([s,rs])=>{
-    const r1=rs.find(x=>filter(x)&&x.round===1)||null;
-    const r2=rs.find(x=>filter(x)&&x.round===2)||null;
-    const r3=rs.find(x=>filter(x)&&x.round===3)||null;
-    if(r1||r2||r3||label==="ทั้งหมด")return {s,r1,r2,r3};
-    return null;
-  }).filter(Boolean);
-  document.getElementById('summaryBar').classList.remove('hidden');
-  document.getElementById('periodLabel').textContent=label;
-  document.getElementById('tankCountPeriod').textContent=list.length;
-  if(currentView==='daily')document.getElementById('tabDailyCount').textContent=list.length;
-  if(currentView==='monthly')document.getElementById('tabMonthlyCount').textContent=list.length;
-  if(!list.length)return showHint(`ไม่พบข้อมูล — ${label}`);
-
-  let html=`<table><thead><tr style="background:#0d47a1;color:white;"><th rowspan="2">เลขถังแก๊ส</th><th colspan="11">ครั้งที่ 1</th><th colspan="11">ครั้งที่ 2</th><th colspan="11">ครั้งที่ 3</th><th rowspan="2">รวมน้ำหนัก/KG.</th></tr><tr style="background:#1565c0;color:white;"><th>วันที่</th><th>ก่อน/KG.</th><th>หลัง/KG.</th><th>น้ำหนัก/KG.</th><th>แรงดัน</th><th>CH4</th><th>CO2</th><th>H2S</th><th>Meter Start</th><th>Meter Finish</th><th>รวม/M3</th><th>วันที่</th><th>ก่อน/KG.</th><th>หลัง/KG.</th><th>น้ำหนัก/KG.</th><th>แรงดัน</th><th>CH4</th><th>CO2</th><th>H2S</th><th>Meter Start</th><th>Meter Finish</th><th>รวม/M3</th><th>วันที่</th><th>ก่อน/KG.</th><th>หลัง/KG.</th><th>น้ำหนัก/KG.</th><th>แรงดัน</th><th>CH4</th><th>CO2</th><th>H2S</th><th>Meter Start</th><th>Meter Finish</th><th>รวม/M3</th></tr></thead><tbody>`;
-  list.forEach(({s,r1,r2,r3})=>{
-    const w=((parseFloat(r1?.weight)||0)+(parseFloat(r2?.weight)||0)+(parseFloat(r3?.weight)||0)).toFixed(2);
-    const td=(x,f='date')=>x?(f==='weight'?`<td class="weight-cell">${x[f]}</td>`:`<td>${x[f]}</td>`):'<td>-</td>';
-    html+=`<tr><td class="serial-cell">${s}</td>${td(r1,'date')}${td(r1,'before')}${td(r1,'after')}${td(r1,'weight')}${td(r1,'pressure')}${td(r1,'ch4')}${td(r1,'co2')}${td(r1,'h2s')}${td(r1,'meterStart')}${td(r1,'meterEnd')}${td(r1,'meterTotal')}${td(r2,'date')}${td(r2,'before')}${td(r2,'after')}${td(r2,'weight')}${td(r2,'pressure')}${td(r2,'ch4')}${td(r2,'co2')}${td(r2,'h2s')}${td(r2,'meterStart')}${td(r2,'meterEnd')}${td(r2,'meterTotal')}${td(r3,'date')}${td(r3,'before')}${td(r3,'after')}${td(r3,'weight')}${td(r3,'pressure')}${td(r3,'ch4')}${td(r3,'co2')}${td(r3,'h2s')}${td(r3,'meterStart')}${td(r3,'meterEnd')}${td(r3,'meterTotal')}<td class="total-kg">${w}</td></tr>`;
-  });
-  html+=`</tbody></table>`;
-  document.getElementById('tableContainer').innerHTML=html;
-  updateCounts();
-}
-
-function exportExcel(){
-  const header=["เลขถังแก๊ส","ครั้งที่ 1 - วันที่","น้ำหนักก่อนอัด/KG.","น้ำหนักหลังอัด/KG.","น้ำหนักครั้งที่ 1/KG.","แรงดัน/Bar","CH4","CO2","H2S","Gas Meter Start","Gas Meter Finish","รวม Gas Meter/M3","ครั้งที่ 2 - วันที่","น้ำหนักก่อนอัด/KG.","น้ำหนักหลังอัด/KG.","น้ำหนักครั้งที่ 2/KG.","แรงดัน/Bar","CH4","CO2","H2S","Gas Meter Start","Gas Meter Finish","รวม Gas Meter/M3","ครั้งที่ 3 - วันที่","น้ำหนักก่อนอัด/KG.","น้ำหนักหลังอัด/KG.","น้ำหนักครั้งที่ 3/KG.","แรงดัน/Bar","CH4","CO2","H2S","Gas Meter Start","Gas Meter Finish","รวม Gas Meter/M3","รวมน้ำหนัก/KG."];
-  const rows=[header];
-  Object.entries(tankDB).sort((a,b)=>a[0].localeCompare(b[0])).forEach(([s,rs])=>{
-    const r1=rs.find(x=>x.round===1)||{};
-    const r2=rs.find(x=>x.round===2)||{};
-    const r3=rs.find(x=>x.round===3)||{};
-    const w=((parseFloat(r1.weight)||0)+(parseFloat(r2.weight)||0)+(parseFloat(r3.weight)||0)).toFixed(2);
-    rows.push([s,r1.date||'',r1.before||'',r1.after||'',r1.weight||'',r1.pressure||'',r1.ch4||'',r1.co2||'',r1.h2s||'',r1.meterStart||'',r1.meterEnd||'',r1.meterTotal||'',r2.date||'',r2.before||'',r2.after||'',r2.weight||'',r2.pressure||'',r2.ch4||'',r2.co2||'',r2.h2s||'',r2.meterStart||'',r2.meterEnd||'',r2.meterTotal||'',r3.date||'',r3.before||'',r3.after||'',r3.weight||'',r3.pressure||'',r3.ch4||'',r3.co2||'',r3.h2s||'',r3.meterStart||'',r3.meterEnd||'',r3.meterTotal||'',w]);
-  });
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),"ข้อมูลถังแก๊ส");
-  XLSX.writeFile(wb,"รายงานถังแก๊ส_"+toDDMMYYYY(new Date()).replace(/\//g,'-')+".xlsx");
-}
-
-// ===== ผู้ดูแลระบบ =====
-function showAdmin(){document.getElementById('adminBar').classList.remove('hidden');document.getElementById('adminPassRow').classList.remove('hidden');document.getElementById('adminActions').classList.add('hidden');document.getElementById('adminPass').focus();}
-function loginAdmin(){if(document.getElementById('adminPass').value.trim()===ADMIN_PASSWORD){isAdmin=true;document.getElementById('adminPassRow').classList.add('hidden');document.getElementById('adminActions').classList.remove('hidden');}else alert("❌ รหัสผ่านไม่ถูกต้อง");}
-function logoutAdmin(){isAdmin=false;document.getElementById('adminPass').value="";document.getElementById('adminBar').classList.add('hidden');document.getElementById('adminActions').classList.add('hidden');}
-
-document.addEventListener('DOMContentLoaded',()=>{
-  document.addEventListener('keydown',e=>{if(e.key==='Enter'&&!document.getElementById('dataForm').classList.contains('hidden')){e.preventDefault();saveRec();}});
-  document.querySelectorAll('.tab-btn').forEach(b=>{b.onclick=()=>{document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');currentView=b.dataset.view;renderTable();};});
-  document.getElementById('btnRefresh').onclick=loadData;
-  document.getElementById('btnSave').onclick=saveRec;
-  document.getElementById('btnExportCurrent').onclick=exportExcel;
-  document.getElementById('btnSearchTank').onclick=searchTank;
-  document.getElementById('btnNewTank').onclick=newTank;
-  document.getElementById('btnAdmin').onclick=showAdmin;
-  document.getElementById('btnLogin').onclick
+(async () => {
+  await initApp();
+})();
+</script>
+</body>
+</html>
